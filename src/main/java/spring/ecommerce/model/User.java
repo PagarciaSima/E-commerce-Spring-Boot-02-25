@@ -1,4 +1,4 @@
-package spring.ecommerce.entity;
+package spring.ecommerce.model;
 
 import java.util.Set;
 
