@@ -2,8 +2,6 @@ package spring.ecommerce.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,19 +46,4 @@ public class RoleController {
 		}
 	}
 
-	/**
-	 * Handles validation errors for role creation requests.
-	 *
-	 * @param ex The exception containing validation error details.
-	 * @return A {@link ResponseEntity} with error messages and a
-	 *         {@link HttpStatus#BAD_REQUEST} status.
-	 */
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		StringBuilder errorMessages = new StringBuilder("Validation failed: ");
-		ex.getBindingResult().getAllErrors()
-				.forEach(error -> errorMessages.append(error.getDefaultMessage()).append(" "));
-		log.warn("Validation errors: {}", errorMessages.toString());
-		return new ResponseEntity<>(errorMessages.toString(), HttpStatus.BAD_REQUEST);
-	}
 }

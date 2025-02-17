@@ -45,19 +45,20 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
 				)
         		.csrf(csrf -> csrf.disable())
         	    .authorizeHttpRequests(
-        	    		auth -> 
+        	    		/*auth -> 
                         auth
                             .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/actuator/**").permitAll()
-                            .requestMatchers("/api/v1/registerNewUser").permitAll()
-                            .requestMatchers("/api/v1/authenticate").permitAll()
                             .requestMatchers("/images/**").permitAll()
-                            .anyRequest().authenticated()
-                        /* auth -> 
-                        auth.anyRequest().permitAll() */
+                            .requestMatchers("/api/v1/user", "/api/v1/authenticate").permitAll()
+                            .requestMatchers("/api/v1/products").permitAll()
+                            .requestMatchers("/api/v1/product").hasRole("AdminRole")
+                            .anyRequest().authenticated()*/
+                         auth -> 
+                        auth.anyRequest().permitAll() 
         	    		
 	    		)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
-        	httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+        		httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         
         return httpSecurity.build();

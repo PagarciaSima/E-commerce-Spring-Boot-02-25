@@ -1,22 +1,28 @@
 package spring.ecommerce.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.jsonwebtoken.ExpiredJwtException;
 
 /**
  * Global exception handler for all controllers and security exceptions.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	
 
     /**
      * Handles validation errors in request bodies.
@@ -24,14 +30,27 @@ public class GlobalExceptionHandler {
      * @param ex the exception containing validation errors
      * @return a {@link ResponseEntity} with the error details and HTTP status 400 (Bad Request)
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put(error.getField(), error.getDefaultMessage());
-        }
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+	    Map<String, String> errors = new HashMap<>();
+	    
+	    // Primero captura los errores de campo
+	    for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+	        errors.put(error.getField(), error.getDefaultMessage());
+	    }
+
+	    // Luego captura los errores globales (de la clase)
+	    for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
+	        errors.put(error.getObjectName(), error.getDefaultMessage());
+	        if (error.getCodes()[0].contains("ValidDiscount")) {
+		        errors.put("Validation-error", "Discount");
+	        }
+	    }
+
+	    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	}
+    
+    
 
     /**
      * Handles authentication failures, such as invalid credentials.
@@ -64,5 +83,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         return new ResponseEntity<>("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
+        // Limpia el contexto de seguridad (desloguea al usuario)
+        SecurityContextHolder.clearContext();
+        
+        return new ResponseEntity<>("Session expired. Please log in again.", HttpStatus.UNAUTHORIZED);
     }
 }
