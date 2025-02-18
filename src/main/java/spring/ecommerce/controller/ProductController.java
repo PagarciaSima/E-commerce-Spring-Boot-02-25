@@ -79,8 +79,8 @@ public class ProductController {
 	public ResponseEntity<?> deleteProduct(@PathVariable (name = "productId") Integer productId) {
 	    log.info("Attempting to delete product with ID: {}", productId);
 	    try {
-	        productService.deleteById(productId);
-	        return ResponseEntity.ok("Product deleted successfully, ID: " + productId);
+	    	 productService.deleteById(productId);
+	         return ResponseEntity.noContent().build(); 
 	    } catch(ProductNotFoundException e) { 
 	        log.warn("Product with ID {} not found", productId);
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found with ID: " + productId);
