@@ -58,7 +58,7 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
         	    		
 	    		)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
-        		httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+        		//httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         
         return httpSecurity.build();

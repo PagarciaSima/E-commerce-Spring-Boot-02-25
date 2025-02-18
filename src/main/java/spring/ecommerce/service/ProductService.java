@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.ProductDao;
+import spring.ecommerce.exception.ProductNotFoundException;
 import spring.ecommerce.model.Product;
 
 @Service
@@ -30,6 +31,21 @@ public class ProductService {
 	}
 	
 	public List<Product> getAllProducts() {
-		return (List<Product>) productDao.findAll();
+	    List<Product> products = (List<Product>) productDao.findAll();
+	    if (products.isEmpty()) {
+	        log.warn("No products found.");
+	    }
+	    return products;
 	}
+
+	public void deleteById(Integer productId) {
+	    if (!productDao.existsById(productId)) {
+	        log.warn("Product with ID {} not found. Cannot delete.", productId);
+	        throw new ProductNotFoundException("Product not found with ID: " + productId);  
+	    }
+	    productDao.deleteById(productId);
+	    log.info("Product with ID {} deleted successfully.", productId);
+	}
+
+
 }

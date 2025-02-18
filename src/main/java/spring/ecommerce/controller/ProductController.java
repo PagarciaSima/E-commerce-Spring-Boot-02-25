@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.exception.ProductNotFoundException;
 import spring.ecommerce.model.Image;
 import spring.ecommerce.model.Product;
 import spring.ecommerce.service.ProductService;
@@ -72,6 +75,21 @@ public class ProductController {
 		}
 	}
 	
+	@DeleteMapping("/product/{productId}")
+	public ResponseEntity<?> deleteProduct(@PathVariable (name = "productId") Integer productId) {
+	    log.info("Attempting to delete product with ID: {}", productId);
+	    try {
+	        productService.deleteById(productId);
+	        return ResponseEntity.ok("Product deleted successfully, ID: " + productId);
+	    } catch(ProductNotFoundException e) { 
+	        log.warn("Product with ID {} not found", productId);
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found with ID: " + productId);
+	    } catch(Exception e) {
+	        log.error("Error occurred while deleting product with ID: {}", productId, e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the product");
+	    }
+	}
+
 	/**
      * Processes and converts uploaded image files into a set of {@link Image} objects.
      *
