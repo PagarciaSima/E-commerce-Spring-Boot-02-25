@@ -47,5 +47,12 @@ public class ProductService {
 	    log.info("Product with ID {} deleted successfully.", productId);
 	}
 
+	public Product getProductById(Integer productId) {
+	    log.info("Attempting to retrieve product with ID: {}", productId);
+	    return productDao.findById(productId)
+	        .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
+	}
+
+
 
 }

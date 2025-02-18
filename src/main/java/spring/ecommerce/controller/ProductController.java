@@ -2,6 +2,8 @@ package spring.ecommerce.controller;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,6 +76,28 @@ public class ProductController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@GetMapping("/product/{productId}/images")
+	public ResponseEntity<List<String>> getProductImages(@PathVariable("productId") Integer productId) {
+	    log.info("Attempting to get images for product ID: {}", productId);
+	    try {
+	        Product product = productService.getProductById(productId);  
+	        if (product == null) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
+	        }
+
+	        // Convertir los byte[] de las imágenes a base64
+	        List<String> imageBase64 = product.getProductImages().stream()
+	                .map(image -> "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getPicByte()))  // Convertir byte[] a base64
+	                .collect(Collectors.toList());
+
+	        return ResponseEntity.ok(imageBase64);  
+	    } catch (Exception e) {
+	        log.error("Error occurred while retrieving images for product with ID: {}", productId, e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
+	    }
+	}
+
 	
 	@DeleteMapping("/product/{productId}")
 	public ResponseEntity<?> deleteProduct(@PathVariable (name = "productId") Integer productId) {
