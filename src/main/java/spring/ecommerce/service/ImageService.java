@@ -20,6 +20,18 @@ public class ImageService {
 
     private final ImageDao imageDao;
 
+    /**
+     * Saves an image to the database.
+     * <p>
+     * This method receives an image file, extracts relevant information such as the file name, content type, and byte data,
+     * then creates an {@link Image} object and saves it to the database using the {@link imageDao}. 
+     * If there is an error during the file processing or saving, an exception is logged and rethrown as a runtime exception.
+     * </p>
+     *
+     * @param file the image file to be saved
+     * @return the saved {@link Image} object
+     * @throws RuntimeException if there is an error saving the image to the database
+     */
     public Image saveImage(MultipartFile file) {
         try {
             log.info("Saving image: {}", file.getOriginalFilename());
@@ -38,7 +50,18 @@ public class ImageService {
         }
     }
 
-
+    /**
+     * Retrieves an image from the database by its ID.
+     * <p>
+     * This method attempts to fetch an {@link Image} object from the database using the provided ID. 
+     * If the image is found, it returns an {@link Optional} containing the image. 
+     * If an error occurs during the fetch process, it logs the error and throws a runtime exception.
+     * </p>
+     *
+     * @param id the ID of the image to be retrieved
+     * @return an {@link Optional} containing the found {@link Image} if present, or an empty {@link Optional} if not found
+     * @throws RuntimeException if there is an error fetching the image from the database
+     */
     public Optional<Image> getImageById(Long id) {
         try {
             log.info("Fetching image by ID: {}", id);
@@ -49,6 +72,18 @@ public class ImageService {
         }
     }
 
+    /**
+     * Retrieves an image from the database by its name.
+     * <p>
+     * This method attempts to fetch an {@link Image} object from the database using the provided name. 
+     * If the image is found, it returns an {@link Optional} containing the image. 
+     * If an error occurs during the fetch process, it logs the error and throws a runtime exception.
+     * </p>
+     *
+     * @param name the name of the image to be retrieved
+     * @return an {@link Optional} containing the found {@link Image} if present, or an empty {@link Optional} if not found
+     * @throws RuntimeException if there is an error fetching the image from the database
+     */
     public Optional<Image> getImageByName(String name) {
         try {
             log.info("Fetching image by name: {}", name);
@@ -59,7 +94,20 @@ public class ImageService {
         }
     }
     
-
+    /**
+     * Removes an image from the database by its ID.
+     * <p>
+     * This method first deletes any relationships between the image and products in the 
+     * {@code product_images} table by calling {@link imageDao#deleteFromProductImagesByImageID(Long)}. 
+     * Afterward, it deletes the image from the {@code image} table using the provided image ID.
+     * </p>
+     * <p>
+     * This operation is performed within a transaction to ensure that both deletions are successful 
+     * and consistent. If any part of the process fails, the transaction is rolled back.
+     * </p>
+     *
+     * @param imageId the ID of the image to be removed
+     */
     @Transactional
     public void removeImage(Long imageId) {
         // Elimina las relaciones en la tabla product_images
