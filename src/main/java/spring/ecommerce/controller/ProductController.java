@@ -148,31 +148,6 @@ public class ProductController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
 	    }
 	}
-	
-//	@GetMapping("/product/{productId}/images")
-//	public ResponseEntity<List<ImageDTO>> getProductImages(@PathVariable("productId") Integer productId) {
-//	    log.info("Attempting to get images for product ID: {}", productId);
-//	    try {
-//	        Product product = productService.getProductById(productId);  
-//	        if (product == null) {
-//	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
-//	        }
-//
-//	        // Convertir las imágenes a base64 y devolver el nombre
-//	        List<ImageDTO> imageDTOs = product.getProductImages().stream()
-//	                .map(image -> new ImageDTO(
-//	                        image.getShortName(),  
-//	                        "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getPicByte()) // Convertir byte[] a base64
-//	                ))
-//	                .collect(Collectors.toList());
-//
-//	        return ResponseEntity.ok(imageDTOs);  
-//	    } catch (Exception e) {
-//	        log.error("Error occurred while retrieving images for product with ID: {}", productId, e);
-//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
-//	    }
-//	}
-
 
 	
 	@DeleteMapping("/product/{productId}")

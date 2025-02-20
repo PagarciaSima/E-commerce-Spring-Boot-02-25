@@ -93,4 +93,24 @@ public class GlobalExceptionHandler {
         
         return new ResponseEntity<>("Session expired. Please log in again.", HttpStatus.UNAUTHORIZED);
     }
+    
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<String> handleProductNotFoundException(ProductNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleProductNotFoundException(UserNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<String> handleProductNotFoundException(ImageUploadException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
