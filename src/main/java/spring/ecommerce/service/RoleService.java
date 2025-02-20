@@ -42,6 +42,6 @@ public class RoleService {
                 .orElseThrow(() -> {
                     log.warn("Role '{}' not found", roleName);
                     return new RoleNotFoundException("Role '" + roleName + "' not found");
-                });
+        });
     }
 }

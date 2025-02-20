@@ -18,13 +18,15 @@ public class Image {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
+	private String shortName;
 	private String type;
 	@Lob
 	@Column(length = 50000000)
 	private byte [] picByte;
 	
-	public Image(String name, String type, byte[] picByte) {
+	public Image(String name, String shortName, String type, byte[] picByte) {
 		super();
+		this.shortName = shortName;
 		this.name = name;
 		this.type = type;
 		this.picByte = picByte;

@@ -28,10 +28,11 @@ import spring.ecommerce.service.UserService;
  * Provides an endpoint for user authentication and JWT token generation.
  */
 @RestController
-@CrossOrigin
 @Slf4j
 @AllArgsConstructor
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "http://localhost:4200")
+
 public class AuthController {
 	
 	private final AuthenticationManager authenticationManager;

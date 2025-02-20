@@ -2,7 +2,7 @@ package spring.ecommerce.controller;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,7 @@ import spring.ecommerce.service.ProductService;
 @RequestMapping("/api/v1")
 @Slf4j
 @AllArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 /**
  * Controller for managing product-related operations.
  */
@@ -57,13 +60,67 @@ public class ProductController {
         	Set<Image> images = uploadImage(files);
         	product.setProductImages(images);
         	
-        	Product createdProduct = productService.addNewProduct(product);
+        	Product createdProduct = productService.addNewProduct(product, files);
             log.info("Product created successfully, ID: {}", createdProduct.getProductId());
     		return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
         } catch (Exception e) {
             log.error("Error occurred while creating product: {}", e.getMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+	}
+	
+	@PutMapping(value = "/product/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<?> updateProduct(
+		@RequestPart("product") @Valid Product product,
+		@PathVariable("productId") Integer productId,
+		@RequestPart(value = "imageFile", required = false) List<MultipartFile> newImages,
+	    @RequestPart(value = "existingImages", required = false) List<String> existingImages
+
+	    ) {
+
+	    try {
+	        // Llama al servicio para actualizar el producto con el productId
+	    	productService.updateProduct(productId, product, newImages, existingImages);
+	    	return ResponseEntity.ok(Collections.singletonMap("message", "Product updated successfully."));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error updating product.");
+	    }
+	}
+
+
+
+	/**
+     * Processes and converts uploaded image files into a set of {@link Image} objects.
+     *
+     * @param multipartFiles The array of uploaded image files.
+     * @return A {@link Set} containing {@link Image} objects created from the files.
+     */
+
+	public Set<Image> uploadImage(MultipartFile[] multipartFiles) {
+	    if (multipartFiles == null || multipartFiles.length == 0) {
+	        return Set.of();
+	    }
+
+	    return Arrays.stream(multipartFiles)
+	        .map(file -> {
+	            try {
+	                if (file.getSize() > MAX_IMAGE_SIZE) {
+	                    log.warn("File {} exceeds the maximum allowed size", file.getOriginalFilename());
+	                    return null;
+	                }
+	                return new Image(
+	                    file.getOriginalFilename(),
+	                    file.getOriginalFilename(),
+	                    file.getContentType(),
+	                    file.getBytes()
+	                );
+	            } catch (IOException e) {
+	                log.error("Error processing file: {}", file.getOriginalFilename(), e);
+	                return null;
+	            }
+	        })
+	        .filter(image -> image != null)
+	        .collect(Collectors.toSet());
 	}
 	
 	@GetMapping("/products")
@@ -92,26 +149,30 @@ public class ProductController {
 	    }
 	}
 	
-	@GetMapping("/product/{productId}/images")
-	public ResponseEntity<List<String>> getProductImages(@PathVariable("productId") Integer productId) {
-	    log.info("Attempting to get images for product ID: {}", productId);
-	    try {
-	        Product product = productService.getProductById(productId);  
-	        if (product == null) {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
-	        }
+//	@GetMapping("/product/{productId}/images")
+//	public ResponseEntity<List<ImageDTO>> getProductImages(@PathVariable("productId") Integer productId) {
+//	    log.info("Attempting to get images for product ID: {}", productId);
+//	    try {
+//	        Product product = productService.getProductById(productId);  
+//	        if (product == null) {
+//	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
+//	        }
+//
+//	        // Convertir las imágenes a base64 y devolver el nombre
+//	        List<ImageDTO> imageDTOs = product.getProductImages().stream()
+//	                .map(image -> new ImageDTO(
+//	                        image.getShortName(),  
+//	                        "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getPicByte()) // Convertir byte[] a base64
+//	                ))
+//	                .collect(Collectors.toList());
+//
+//	        return ResponseEntity.ok(imageDTOs);  
+//	    } catch (Exception e) {
+//	        log.error("Error occurred while retrieving images for product with ID: {}", productId, e);
+//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
+//	    }
+//	}
 
-	        // Convertir los byte[] de las imágenes a base64
-	        List<String> imageBase64 = product.getProductImages().stream()
-	                .map(image -> "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getPicByte()))  // Convertir byte[] a base64
-	                .collect(Collectors.toList());
-
-	        return ResponseEntity.ok(imageBase64);  
-	    } catch (Exception e) {
-	        log.error("Error occurred while retrieving images for product with ID: {}", productId, e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
-	    }
-	}
 
 	
 	@DeleteMapping("/product/{productId}")
@@ -128,39 +189,8 @@ public class ProductController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the product");
 	    }
 	}
-
-	/**
-     * Processes and converts uploaded image files into a set of {@link Image} objects.
-     *
-     * @param multipartFiles The array of uploaded image files.
-     * @return A {@link Set} containing {@link Image} objects created from the files.
-     */
-
-	public Set<Image> uploadImage(MultipartFile[] multipartFiles) {
-	    if (multipartFiles == null || multipartFiles.length == 0) {
-	        return Set.of();
-	    }
-
-	    return Arrays.stream(multipartFiles)
-	        .map(file -> {
-	            try {
-	                if (file.getSize() > MAX_IMAGE_SIZE) {
-	                    log.warn("File {} exceeds the maximum allowed size", file.getOriginalFilename());
-	                    return null;
-	                }
-	                return new Image(
-	                    file.getOriginalFilename(),
-	                    file.getContentType(),
-	                    file.getBytes()
-	                );
-	            } catch (IOException e) {
-	                log.error("Error processing file: {}", file.getOriginalFilename(), e);
-	                return null;
-	            }
-	        })
-	        .filter(image -> image != null)
-	        .collect(Collectors.toSet());
-	}
+	
+	
 
 
 }
