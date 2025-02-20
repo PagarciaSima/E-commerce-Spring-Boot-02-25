@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.FieldError;
@@ -22,13 +23,29 @@ import io.jsonwebtoken.ExpiredJwtException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	
-	
-
     /**
-     * Handles validation errors in request bodies.
+     * Handles any unexpected errors that occur in the application.
      *
-     * @param ex the exception containing validation errors
-     * @return a {@link ResponseEntity} with the error details and HTTP status 400 (Bad Request)
+     * @param ex the exception
+     * @return a {@link ResponseEntity} with an error message and HTTP status 500 (Internal Server Error)
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
+        return new ResponseEntity<>("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    } 
+	
+	// VALIDATION EXCEPTIONS
+	
+    /**
+     * Handles validation exceptions that occur when a method argument fails validation.
+     * This method processes the validation errors that occur in request bodies or query parameters,
+     * including both field-level and global errors.
+     *
+     * @param ex The {@link MethodArgumentNotValidException} thrown when validation fails.
+     *           It contains the details of the validation errors.
+     * @return A {@link ResponseEntity} with a map of validation errors. 
+     *         The map contains the field names as keys and the associated error messages as values.
+     *         The response will have a status of 400 Bad Request, indicating invalid input.
      */
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -51,6 +68,7 @@ public class GlobalExceptionHandler {
 	}
     
     
+	// AUTH EXCEPTIONS
 
     /**
      * Handles authentication failures, such as invalid credentials.
@@ -64,6 +82,21 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles exceptions related to authentication service errors.
+     * This method catches {@link InternalAuthenticationServiceException} thrown 
+     * during the authentication process and returns an appropriate error message.
+     * 
+     * @param ex The {@link InternalAuthenticationServiceException} thrown during authentication.
+     *           It contains the error message and details about the service failure.
+     * @return A {@link ResponseEntity} containing an error message and HTTP status 500 (Internal Server Error),
+     *         indicating that there was an issue with the authentication service.
+     */
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<String> handleInternalAuthenticationServiceException(InternalAuthenticationServiceException ex) {
+        return new ResponseEntity<>("Authentication service error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    /**
      * Handles general authentication exceptions.
      *
      * @param ex the authentication exception
@@ -73,19 +106,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
         return new ResponseEntity<>("Authentication failed: " + ex.getMessage(), HttpStatus.FORBIDDEN);
     }
-
+    
     /**
-     * Handles any unexpected errors that occur in the application.
-     *
-     * @param ex the exception
-     * @return a {@link ResponseEntity} with an error message and HTTP status 500 (Internal Server Error)
+     * Handles expired JWT token exceptions.
+     * This method catches {@link ExpiredJwtException} when a JWT token has expired and returns
+     * an appropriate error message. It also clears the security context to log out the user.
+     * 
+     * @param ex The {@link ExpiredJwtException} thrown when the JWT token is expired.
+     *           It contains details about the expired token.
+     * @return A {@link ResponseEntity} with an error message and HTTP status 401 (Unauthorized),
+     *         indicating that the session has expired and the user needs to log in again.
      */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        return new ResponseEntity<>("An unexpected error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    
-    
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<String> handleExpiredJwtException(ExpiredJwtException ex) {
         // Limpia el contexto de seguridad (desloguea al usuario)
@@ -94,21 +125,54 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Session expired. Please log in again.", HttpStatus.UNAUTHORIZED);
     }
     
+    // NOT FOUND EXCEPTIONS
+    
+    /**
+     * Handles RoleNotFoundException when a specified role is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link RoleNotFoundException} thrown when the role is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Handles ProductNotFoundException when a specified product is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link ProductNotFoundException} thrown when the product is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<String> handleProductNotFoundException(ProductNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
-    
+
+    /**
+     * Handles UserNotFoundException when a specified user is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link UserNotFoundException} thrown when the user is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleProductNotFoundException(UserNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
+
     
+    // IMAGE EXCEPTIONS
+    
+    /**
+     * Handles ImageUploadException when an error occurs during the image upload process.
+     * This method returns a response with the exception message and HTTP status 500 (Internal Server Error).
+     * 
+     * @param ex The {@link ImageUploadException} thrown when an error occurs during the image upload process.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 500 (Internal Server Error).
+     */
     @ExceptionHandler(ImageUploadException.class)
     public ResponseEntity<String> handleProductNotFoundException(ImageUploadException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

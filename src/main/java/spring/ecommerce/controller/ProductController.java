@@ -137,16 +137,11 @@ public class ProductController {
 	@GetMapping("/product/{productId}")
 	public ResponseEntity<Product> getProduct(@PathVariable("productId") Integer productId) {
 	    log.info("Attempting to get images for product ID: {}", productId);
-	    try {
-	        Product product = productService.getProductById(productId);  
-	        if (product == null) {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
-	        }
-	        return ResponseEntity.ok(product);  
-	    } catch (Exception e) {
-	        log.error("Error occurred while retrieving product with ID: {}", productId, e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); 
-	    }
+        Product product = productService.getProductById(productId);  
+        if (product == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
+        }
+        return ResponseEntity.ok(product);  
 	}
 
 	

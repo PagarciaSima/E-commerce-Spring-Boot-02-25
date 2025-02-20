@@ -3,7 +3,6 @@ package spring.ecommerce.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.ImageDao;
-import spring.ecommerce.dao.ProductDao;
 import spring.ecommerce.model.Image;
-import spring.ecommerce.model.Product;
 
 @Service
 @AllArgsConstructor
@@ -22,9 +19,6 @@ import spring.ecommerce.model.Product;
 public class ImageService {
 
     private final ImageDao imageDao;
-    
-    private final ProductDao productDao;
-
 
     public Image saveImage(MultipartFile file) {
         try {

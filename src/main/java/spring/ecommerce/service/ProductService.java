@@ -120,14 +120,6 @@ public class ProductService {
 	    log.info("Product with ID {} updated successfully.", id);
 	}
 
-	/**
-	 * Método para eliminar una imagen del sistema o base de datos
-	 */
-	private void deleteImage(Image img) {
-	    log.info("Deleting image: {}", img.getShortName());
-	    imageDao.deleteById(img.getId()); 
-	}
-
 
 	/**
 	 * Uploads images and assigns them unique names.
