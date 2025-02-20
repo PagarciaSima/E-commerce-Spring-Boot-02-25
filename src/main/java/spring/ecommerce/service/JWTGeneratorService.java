@@ -52,5 +52,4 @@ public class JWTGeneratorService {
         logger.info("JWT token successfully generated for user: {}", username);
         return "Bearer " + token;
     }
-
 }

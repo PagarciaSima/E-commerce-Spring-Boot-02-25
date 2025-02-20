@@ -19,8 +19,4 @@ public class DiscountPriceValidator implements ConstraintValidator<ValidDiscount
         return true;
     }
 
-    @Override
-    public void initialize(ValidDiscountPrice constraintAnnotation) {
-        // No es necesario inicializar nada en este caso
-    }
 }

@@ -50,6 +50,14 @@ public class ProductService {
 	    return savedProduct;
 	}
 
+	/**
+	 * Retrieves all products stored in the database.
+	 *
+	 * This method fetches all products from the {@code productDao} repository.
+	 * If no products are found, a warning message is logged.
+	 *
+	 * @return A {@link List} of {@link Product} objects representing all stored products.
+	 */
 	public List<Product> getAllProducts() {
 	    List<Product> products = (List<Product>) productDao.findAll();
 	    if (products.isEmpty()) {
@@ -58,6 +66,16 @@ public class ProductService {
 	    return products;
 	}
 
+	/**
+	 * Deletes a product by its ID.
+	 *
+	 * This method checks if the product with the given {@code productId} exists in the database.
+	 * If the product does not exist, it logs a warning and throws a {@link ProductNotFoundException}.
+	 * Otherwise, it deletes the product and logs a confirmation message.
+	 *
+	 * @param productId The ID of the product to be deleted.
+	 * @throws ProductNotFoundException if the product with the given ID does not exist.
+	 */
 	public void deleteById(Integer productId) {
 	    if (!productDao.existsById(productId)) {
 	        log.warn("Product with ID {} not found. Cannot delete.", productId);
@@ -67,12 +85,36 @@ public class ProductService {
 	    log.info("Product with ID {} deleted successfully.", productId);
 	}
 
+	/**
+	 * Retrieves a product by its ID.
+	 *
+	 * This method attempts to find a product in the database using the provided {@code productId}.
+	 * If the product is found, it is returned. Otherwise, a {@link ProductNotFoundException} is thrown.
+	 *
+	 * @param productId The ID of the product to retrieve.
+	 * @return The {@link Product} associated with the given ID.
+	 * @throws ProductNotFoundException if no product is found with the given ID.
+	 */
 	public Product getProductById(Integer productId) {
 	    log.info("Attempting to retrieve product with ID: {}", productId);
 	    return productDao.findById(productId)
 	        .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 	}
 
+	/**
+	 * Updates an existing product with the given details, including new images and image previews.
+	 *
+	 * This method retrieves the existing product by its ID, updates its attributes,
+	 * handles the removal of preview images, adds new images if provided, and saves
+	 * the updated product in the database.
+	 *
+	 * @param id            The ID of the product to be updated.
+	 * @param product       The updated product details.
+	 * @param newImages     A list of new images to be added to the product (optional).
+	 * @param previewImages A list of existing image names to be removed from the product (optional).
+	 * @throws ProductNotFoundException if no product is found with the given ID.
+	 * @throws ImageUploadException if an error occurs while uploading new images.
+	 */
 	public void updateProduct(Integer id, Product product, List<MultipartFile> newImages, List<String> previewImages) {
 	    log.info("Updating product with ID: {}", id);
 
@@ -119,7 +161,6 @@ public class ProductService {
 	    productDao.save(existingProduct);
 	    log.info("Product with ID {} updated successfully.", id);
 	}
-
 
 	/**
 	 * Uploads images and assigns them unique names.

@@ -10,7 +10,7 @@ public class Constants {
 	public static final String TOKEN_BEARER_PREFIX = "Bearer ";
 	
 	public static final String SECRET_KEY = "BALmhuXUaZK3YgRyxvQ0z8u2XyMolP6Tyqs9hl3ktNFBZPNCuRsTABmqG2ToINu47iSPF+B0I3mHTxUZhYA1kA==";
-	public static final long TOKEN_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour
+	public static final long TOKEN_EXPIRATION_TIME = 120 * 60 * 1000; // 2 hour
 	
 	public static Key getSignedKey(String secretKey) {
 		byte [] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);

@@ -117,6 +117,15 @@ public class ImageService {
         imageDao.deleteById(imageId);
     }
 
+    /**
+     * Retrieves all images stored in the database.
+     *
+     * This method fetches all images from the {@code imageDao} repository.
+     * If an error occurs during the retrieval process, a {@link RuntimeException} is thrown.
+     *
+     * @return A {@link List} of {@link Image} objects representing all stored images.
+     * @throws RuntimeException if an error occurs while retrieving the images.
+     */
     public List<Image> getAllImages() {
         try {
             log.info("Fetching all images.");
