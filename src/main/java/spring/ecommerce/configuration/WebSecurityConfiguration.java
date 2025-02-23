@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,16 +46,22 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
 				)
         		.csrf(csrf -> csrf.disable())
         	    .authorizeHttpRequests(
-        	    		/*auth -> 
+        	    		auth -> 
                         auth
                             .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/actuator/**").permitAll()
                             .requestMatchers("/images/**").permitAll()
-                            .requestMatchers("/api/v1/user", "/api/v1/authenticate").permitAll()
+                            .requestMatchers("/api/v1/user/register").permitAll()
+                            .requestMatchers("/api/v1/authenticate").permitAll()
+                            .requestMatchers("/api/v1/images/**").hasRole("AdminRole")
+                            
+                            .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
+                            .requestMatchers("/api/v1/products/**").hasRole("AdminRole") 
                             .requestMatchers("/api/v1/products").permitAll()
                             .requestMatchers("/api/v1/product").hasRole("AdminRole")
-                            .anyRequest().authenticated()*/
-                         auth -> 
-                        auth.anyRequest().permitAll() 
+                            .anyRequest().authenticated()
+                         /*auth -> 
+                        auth.anyRequest().permitAll() */
         	    		
 	    		)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 

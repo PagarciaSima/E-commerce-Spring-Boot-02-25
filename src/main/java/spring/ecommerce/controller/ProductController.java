@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,13 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.files.PdfService;
 import spring.ecommerce.model.Image;
 import spring.ecommerce.model.Product;
 import spring.ecommerce.service.ProductService;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/products")
 @Slf4j
 @AllArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
@@ -39,6 +41,7 @@ import spring.ecommerce.service.ProductService;
  */
 public class ProductController {
 
+    private final PdfService pdfService; // Servicio para generar el PDF
 	private final ProductService productService;
 	private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -166,7 +169,7 @@ public class ProductController {
 	 *
 	 * @return a {@link ResponseEntity} containing the list of all products if successful, or an error response with an HTTP 500 status if an error occurs.
 	 */
-	@GetMapping("/products")
+	@GetMapping()
 	public ResponseEntity<?> getAllProducts() {
         log.info("Attempting to get product list");
 		try {
@@ -221,4 +224,31 @@ public class ProductController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the product");
 	    }
 	}
+	
+	@GetMapping("/pdf")
+	public ResponseEntity<byte[]> generateProductListPdf() {
+	    try {
+	        // Obtener todos los productos ordenados por nombre
+	        List<Product> products = productService.getAllProductsOrderedByName();
+
+	        // Llamar al servicio para generar el PDF sin paginación
+	        byte[] pdfBytes = pdfService.generateProductListPdf(products);
+
+	        // Configurar encabezados para la descarga del archivo PDF
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.add("Content-Disposition", "attachment; filename=product_list.pdf");
+	        headers.add("Content-Type", "application/pdf");
+
+	        // Devolver el PDF como respuesta
+	        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
+	}
+
+	
+
+
+
+
 }

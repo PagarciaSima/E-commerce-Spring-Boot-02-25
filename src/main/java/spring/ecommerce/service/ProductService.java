@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -187,4 +191,15 @@ public class ProductService {
 	    }
 	    return images;
 	}
+	
+	public List<Product> getAllProductsOrderedByNameWithPagination(int page, int size) {
+	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productName")));
+	    Page<Product> productPage = productDao.findAll(pageable);
+	    return productPage.getContent();
+	}
+	
+	public List<Product> getAllProductsOrderedByName() {
+	    return productDao.findAll(Sort.by(Sort.Order.asc("productName")));
+	}
+
 }

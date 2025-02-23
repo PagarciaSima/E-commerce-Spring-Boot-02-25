@@ -22,7 +22,7 @@ import spring.ecommerce.service.UserService;
 @RestController
 @Slf4j
 @AllArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/user")
 @CrossOrigin(origins = "http://localhost:4200")
 
 public class UserController {
@@ -38,7 +38,7 @@ public class UserController {
      * @return A {@link ResponseEntity} containing the created {@link User} 
      *         or an error response in case of failure.
      */
-    @PostMapping("/user")
+    @PostMapping("/register")
     public ResponseEntity<User> createNewUser(@RequestBody @Valid User user) {
         log.info("Attempting to create a new user: {}", user.getUserName());
 

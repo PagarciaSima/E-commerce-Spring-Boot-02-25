@@ -31,7 +31,7 @@ public class Product {
     @Size(min = 3, max = 100, message = "Product name must be between 3 and 100 characters")
 	private String productName;
 	
-    @Size(max = 500, message = "Product description must not exceed 500 characters")
+    @Size(max = 255, message = "Product description must not exceed 255 characters")
 	private String productDescription;
     
     @NotNull(message = "Discounted price cannot be null")
