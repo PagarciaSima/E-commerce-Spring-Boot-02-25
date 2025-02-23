@@ -19,10 +19,14 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 
+import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.model.Product;
 
 @Service
+@Slf4j
 public class PdfService {
+	
+	private static final int PDF_PAGE_SIZE = 10;
 	
 	/**
 	 * Generates a PDF file containing a product list displayed in a table format. 
@@ -33,6 +37,7 @@ public class PdfService {
 	 * @throws IOException If an error occurs while creating or writing the PDF.
 	 */
 	public byte[] generateProductListPdf(List<Product> products) throws IOException {
+		log.debug("Generating PDF List Products file");
 	    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 	    PdfWriter writer = new PdfWriter(byteArrayOutputStream);
 	    PdfDocument pdfDocument = new PdfDocument(writer);
@@ -50,7 +55,7 @@ public class PdfService {
 	    generateSpace(document, 2);
 
 	    // Dividir la lista de productos en grupos de 8
-	    int pageSize = 8;
+	    int pageSize = PDF_PAGE_SIZE;
 	    int totalProducts = products.size();
 	    int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
 
@@ -81,6 +86,7 @@ public class PdfService {
      * @return A {@link Table} object populated with the product details.
      */
 	private Table generateTable(List<Product> products) {
+		log.debug("Generating List Products table");
 		float[] columnWidths = {2, 2, 3, 2, 2};
         Table table = new Table(columnWidths).useAllAvailableWidth();
         // Encabezado en cada página
@@ -131,7 +137,7 @@ public class PdfService {
 	private void generateLogo(PdfDocument pdfDocument, Document document) throws MalformedURLException {
 		String logoPath = "src/main/resources/static/logo.png";
         Image logo = new Image(ImageDataFactory.create(logoPath));
-        logo.scaleAbsolute(50, 50); 
+        logo.scaleAbsolute(50, 40); 
         logo.setFixedPosition(50, pdfDocument.getDefaultPageSize().getHeight() - 70); 
         document.add(logo);
 	}

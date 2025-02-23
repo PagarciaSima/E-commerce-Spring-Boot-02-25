@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.files.CsvService;
 import spring.ecommerce.files.PdfService;
 import spring.ecommerce.model.Image;
 import spring.ecommerce.model.Product;
@@ -43,6 +44,7 @@ public class ProductController {
 
     private final PdfService pdfService; // Servicio para generar el PDF
 	private final ProductService productService;
+	private final CsvService csvService;
 	private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 	/**
@@ -225,6 +227,17 @@ public class ProductController {
 	    }
 	}
 	
+	/**
+	 * Generates a PDF document containing a list of all products ordered by name.
+	 * 
+	 * This method retrieves all products from the database, orders them by name, and generates
+	 * a PDF file that includes the list of products. The PDF is generated without pagination.
+	 * The file is then returned as a downloadable response with the appropriate headers for a PDF file.
+	 * 
+	 * @return ResponseEntity<byte[]> A response entity containing the PDF file in byte array format
+	 *         along with the necessary headers for download. If an error occurs during the PDF generation,
+	 *         an internal server error response is returned.
+	 */
 	@GetMapping("/pdf")
 	public ResponseEntity<byte[]> generateProductListPdf() {
 	    try {
@@ -245,10 +258,41 @@ public class ProductController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	    }
 	}
-
 	
+    /**
+     * Endpoint to generate and download a CSV file containing all products.
+     *
+     * @return A {@link ResponseEntity} containing the CSV file as a byte array.
+     *         The response will include appropriate headers for file download.
+     */
+    @GetMapping("/csv")
+    public ResponseEntity<byte[]> downloadProductListCsv() {
+        log.info("Request received to download product list as CSV.");
 
+        try {
+            List<Product> products = productService.getAllProductsOrderedByName();
+            log.debug("Fetched {} products from the database.", products.size());
 
+            byte[] csvData = csvService.generateProductListCsv(products);
 
+            if (csvData == null || csvData.length == 0) {
+                log.warn("CSV generation failed or returned empty data.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            // Set HTTP headers for file download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "product_list.csv");
+
+            log.info("CSV file generated successfully. Sending response to client.");
+
+            return new ResponseEntity<>(csvData, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error occurred while generating the CSV file.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
 }
