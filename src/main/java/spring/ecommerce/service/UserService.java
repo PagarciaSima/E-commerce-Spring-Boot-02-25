@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.UserDao;
+import spring.ecommerce.entity.UserEntity;
 import spring.ecommerce.exception.UserNotFoundException;
-import spring.ecommerce.model.User;
 
 @Service
 @AllArgsConstructor
@@ -23,9 +23,9 @@ public class UserService {
      * @param user the user to be saved
      * @return the saved user
      */
-    public User createNewUser(User user) {
+    public UserEntity createNewUser(UserEntity user) {
         log.info("Creating a new user with username: {}", user.getUserName());
-        User savedUser = userDao.save(user);
+        UserEntity savedUser = userDao.save(user);
         log.info("User created successfully: {}", savedUser.getUserName());
         return savedUser;
     }
@@ -37,7 +37,7 @@ public class UserService {
      * @return the found user
      * @throws UserNotFoundException if the user does not exist
      */
-    public User findByUserName(String username) {
+    public UserEntity findByUserName(String username) {
         log.info("Searching for user with username: {}", username);
         return Optional.ofNullable(userDao.findByUserName(username))
                 .orElseThrow(() -> {

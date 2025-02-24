@@ -8,12 +8,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import spring.ecommerce.model.Product;
+import spring.ecommerce.entity.ProductEntity;
 
 @Repository
-public interface ProductDao extends CrudRepository<Product, Integer>{
+public interface ProductDao extends CrudRepository<ProductEntity, Integer>{
 
-	Page<Product> findAll(Pageable pageable);
+	Page<ProductEntity> findAll(Pageable pageable);
 
-	List<Product> findAll(Sort sort);
+	List<ProductEntity> findAll(Sort sort);
 }

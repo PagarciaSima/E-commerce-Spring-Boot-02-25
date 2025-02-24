@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.ImageDao;
-import spring.ecommerce.model.Image;
+import spring.ecommerce.entity.ImageEntity;
 
 @Service
 @AllArgsConstructor
@@ -24,19 +24,19 @@ public class ImageService {
      * Saves an image to the database.
      * <p>
      * This method receives an image file, extracts relevant information such as the file name, content type, and byte data,
-     * then creates an {@link Image} object and saves it to the database using the {@link imageDao}. 
+     * then creates an {@link ImageEntity} object and saves it to the database using the {@link imageDao}. 
      * If there is an error during the file processing or saving, an exception is logged and rethrown as a runtime exception.
      * </p>
      *
      * @param file the image file to be saved
-     * @return the saved {@link Image} object
+     * @return the saved {@link ImageEntity} object
      * @throws RuntimeException if there is an error saving the image to the database
      */
-    public Image saveImage(MultipartFile file) {
+    public ImageEntity saveImage(MultipartFile file) {
         try {
             log.info("Saving image: {}", file.getOriginalFilename());
 
-            Image image = new Image(
+            ImageEntity image = new ImageEntity(
                 file.getOriginalFilename(), 
                 file.getOriginalFilename(), 
                 file.getContentType(), 
@@ -53,16 +53,16 @@ public class ImageService {
     /**
      * Retrieves an image from the database by its ID.
      * <p>
-     * This method attempts to fetch an {@link Image} object from the database using the provided ID. 
+     * This method attempts to fetch an {@link ImageEntity} object from the database using the provided ID. 
      * If the image is found, it returns an {@link Optional} containing the image. 
      * If an error occurs during the fetch process, it logs the error and throws a runtime exception.
      * </p>
      *
      * @param id the ID of the image to be retrieved
-     * @return an {@link Optional} containing the found {@link Image} if present, or an empty {@link Optional} if not found
+     * @return an {@link Optional} containing the found {@link ImageEntity} if present, or an empty {@link Optional} if not found
      * @throws RuntimeException if there is an error fetching the image from the database
      */
-    public Optional<Image> getImageById(Long id) {
+    public Optional<ImageEntity> getImageById(Long id) {
         try {
             log.info("Fetching image by ID: {}", id);
             return imageDao.findById(id);
@@ -75,16 +75,16 @@ public class ImageService {
     /**
      * Retrieves an image from the database by its name.
      * <p>
-     * This method attempts to fetch an {@link Image} object from the database using the provided name. 
+     * This method attempts to fetch an {@link ImageEntity} object from the database using the provided name. 
      * If the image is found, it returns an {@link Optional} containing the image. 
      * If an error occurs during the fetch process, it logs the error and throws a runtime exception.
      * </p>
      *
      * @param name the name of the image to be retrieved
-     * @return an {@link Optional} containing the found {@link Image} if present, or an empty {@link Optional} if not found
+     * @return an {@link Optional} containing the found {@link ImageEntity} if present, or an empty {@link Optional} if not found
      * @throws RuntimeException if there is an error fetching the image from the database
      */
-    public Optional<Image> getImageByName(String name) {
+    public Optional<ImageEntity> getImageByName(String name) {
         try {
             log.info("Fetching image by name: {}", name);
             return imageDao.findByName(name);
@@ -123,13 +123,13 @@ public class ImageService {
      * This method fetches all images from the {@code imageDao} repository.
      * If an error occurs during the retrieval process, a {@link RuntimeException} is thrown.
      *
-     * @return A {@link List} of {@link Image} objects representing all stored images.
+     * @return A {@link List} of {@link ImageEntity} objects representing all stored images.
      * @throws RuntimeException if an error occurs while retrieving the images.
      */
-    public List<Image> getAllImages() {
+    public List<ImageEntity> getAllImages() {
         try {
             log.info("Fetching all images.");
-            return (List<Image>) imageDao.findAll();
+            return (List<ImageEntity>) imageDao.findAll();
         } catch (Exception e) {
             log.error("Error fetching all images: {}", e.getMessage());
             throw new RuntimeException("Error fetching all images.");

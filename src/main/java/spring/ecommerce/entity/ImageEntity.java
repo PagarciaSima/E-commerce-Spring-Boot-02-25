@@ -1,4 +1,4 @@
-package spring.ecommerce.model;
+package spring.ecommerce.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,13 +6,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @NoArgsConstructor
-public class Image {
+@Table(name = "image")
+public class ImageEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +26,7 @@ public class Image {
 	@Column(length = 50000000)
 	private byte [] picByte;
 	
-	public Image(String name, String shortName, String type, byte[] picByte) {
+	public ImageEntity(String name, String shortName, String type, byte[] picByte) {
 		super();
 		this.shortName = shortName;
 		this.name = name;

@@ -3,11 +3,11 @@ package spring.ecommerce.dao;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import spring.ecommerce.model.User;
+import spring.ecommerce.entity.UserEntity;
 
 @Repository
-public interface UserDao extends CrudRepository<User, String>{
+public interface UserDao extends CrudRepository<UserEntity, String>{
 
-	User findByUserName(String username);
+	UserEntity findByUserName(String username);
 
 }

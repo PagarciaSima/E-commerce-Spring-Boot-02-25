@@ -7,11 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import jakarta.transaction.Transactional;
-import spring.ecommerce.model.Image;
+import spring.ecommerce.entity.ImageEntity;
 
-public interface ImageDao extends CrudRepository<Image, Long> {
+public interface ImageDao extends CrudRepository<ImageEntity, Long> {
 
-	Optional<Image> findByName(String name);
+	Optional<ImageEntity> findByName(String name);
 
 	@Modifying
 	@Transactional

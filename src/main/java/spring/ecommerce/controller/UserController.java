@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.User;
+import spring.ecommerce.entity.UserEntity;
 import spring.ecommerce.service.UserService;
 
 /**
@@ -35,16 +35,16 @@ public class UserController {
      * The password is securely hashed before storing it.
      *
      * @param user The user object containing registration details.
-     * @return A {@link ResponseEntity} containing the created {@link User} 
+     * @return A {@link ResponseEntity} containing the created {@link UserEntity} 
      *         or an error response in case of failure.
      */
     @PostMapping("/register")
-    public ResponseEntity<User> createNewUser(@RequestBody @Valid User user) {
+    public ResponseEntity<UserEntity> createNewUser(@RequestBody @Valid UserEntity user) {
         log.info("Attempting to create a new user: {}", user.getUserName());
 
         try {
             user.setUserPassword(bcryptPasswordEncoder.encode(user.getUserPassword()));
-            User createdUser = userService.createNewUser(user);
+            UserEntity createdUser = userService.createNewUser(user);
             log.info("User created successfully: {}", user.getUserName());
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
         } catch (Exception e) {

@@ -17,11 +17,11 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.ImageDao;
 import spring.ecommerce.dao.ProductDao;
+import spring.ecommerce.dto.PageResponseDto;
+import spring.ecommerce.entity.ImageEntity;
+import spring.ecommerce.entity.ProductEntity;
 import spring.ecommerce.exception.ImageUploadException; // Nueva excepción personalizada
 import spring.ecommerce.exception.ProductNotFoundException;
-import spring.ecommerce.model.Image;
-import spring.ecommerce.model.PageResponse;
-import spring.ecommerce.model.Product;
 
 @Service
 @Slf4j
@@ -37,12 +37,12 @@ public class ProductService {
      * @param product the product to be saved
      * @return the saved product
      */
-	public Product addNewProduct(Product product, MultipartFile[] files) {
+	public ProductEntity addNewProduct(ProductEntity product, MultipartFile[] files) {
 	    log.info("Creating a new product: {}", product.getProductName());
 
 	    if (files != null && files.length > 0) {
 	        try {
-	            Set<Image> images = uploadImages(files);
+	            Set<ImageEntity> images = uploadImages(files);
 	            product.setProductImages(images);
 	        } catch (ImageUploadException e) {
 	            log.error("Error uploading images", e);
@@ -50,7 +50,7 @@ public class ProductService {
 	        }
 	    }
 
-	    Product savedProduct = productDao.save(product);
+	    ProductEntity savedProduct = productDao.save(product);
 	    log.info("Product created successfully: {}", savedProduct.getProductId());
 	    return savedProduct;
 	}
@@ -61,21 +61,33 @@ public class ProductService {
 	 * This method fetches all products from the {@code productDao} repository.
 	 * If no products are found, a warning message is logged.
 	 *
-	 * @return A {@link List} of {@link Product} objects representing all stored products.
+	 * @return A {@link List} of {@link ProductEntity} objects representing all stored products.
 	 */
-	public List<Product> getAllProducts() {
-	    List<Product> products = (List<Product>) productDao.findAll();
+	public List<ProductEntity> getAllProducts() {
+	    List<ProductEntity> products = (List<ProductEntity>) productDao.findAll();
 	    if (products.isEmpty()) {
 	        log.warn("No products found.");
 	    }
 	    return products;
 	}
 	
-	public PageResponse<Product> getAllProductsOrderedByNameWithPagination(int page, int size) {
+	/**
+	 * Retrieves a paginated and sorted list of products ordered by their name.
+	 * 
+	 * This method fetches a paginated list of products from the database, ordered by the 
+	 * product name in ascending order. It uses the provided page number and page size 
+	 * to determine the pagination parameters.
+	 * 
+	 * @param page The page number to retrieve, starting from 0.
+	 * @param size The number of products per page.
+	 * @return A PageResponse object containing the list of products, total number of pages, 
+	 *         total number of elements, page size, and the current page number.
+	 */
+	public PageResponseDto<ProductEntity> getAllProductsOrderedByNameWithPagination(int page, int size) {
 	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productName")));
-	    Page<Product> productPage = productDao.findAll(pageable);
+	    Page<ProductEntity> productPage = productDao.findAll(pageable);
 
-	    return new PageResponse<>(
+	    return new PageResponseDto<>(
 	        productPage.getContent(),
 	        productPage.getTotalPages(),
 	        productPage.getTotalElements(),
@@ -83,9 +95,16 @@ public class ProductService {
 	        productPage.getNumber()
 	    );
 	}
-
 	
-	public List<Product> getAllProductsOrderedByName() {
+	/**
+	 * Retrieves a list of all products ordered by their name in ascending order.
+	 * 
+	 * This method fetches all products from the database, ordered by the product name 
+	 * in ascending order.
+	 * 
+	 * @return A list of all products sorted by their name.
+	 */
+	public List<ProductEntity> getAllProductsOrderedByName() {
 	    return productDao.findAll(Sort.by(Sort.Order.asc("productName")));
 	}
 
@@ -115,10 +134,10 @@ public class ProductService {
 	 * If the product is found, it is returned. Otherwise, a {@link ProductNotFoundException} is thrown.
 	 *
 	 * @param productId The ID of the product to retrieve.
-	 * @return The {@link Product} associated with the given ID.
+	 * @return The {@link ProductEntity} associated with the given ID.
 	 * @throws ProductNotFoundException if no product is found with the given ID.
 	 */
-	public Product getProductById(Integer productId) {
+	public ProductEntity getProductById(Integer productId) {
 	    log.info("Attempting to retrieve product with ID: {}", productId);
 	    return productDao.findById(productId)
 	        .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
@@ -138,10 +157,10 @@ public class ProductService {
 	 * @throws ProductNotFoundException if no product is found with the given ID.
 	 * @throws ImageUploadException if an error occurs while uploading new images.
 	 */
-	public void updateProduct(Integer id, Product product, List<MultipartFile> newImages, List<String> previewImages) {
+	public void updateProduct(Integer id, ProductEntity product, List<MultipartFile> newImages, List<String> previewImages) {
 	    log.info("Updating product with ID: {}", id);
 
-	    Product existingProduct = this.getProductById(id);
+	    ProductEntity existingProduct = this.getProductById(id);
 
 	    // Actualizar los atributos del producto
 	    existingProduct.setProductName(product.getProductName());
@@ -150,12 +169,12 @@ public class ProductService {
 	    existingProduct.setProductDiscountedPrice(product.getProductDiscountedPrice());
 
 	    // Obtener todas las imágenes actuales del producto
-	    Set<Image> savedImages = new HashSet<>(existingProduct.getProductImages());
-	    Set<Image> finalImages = new HashSet<>();
+	    Set<ImageEntity> savedImages = new HashSet<>(existingProduct.getProductImages());
+	    Set<ImageEntity> finalImages = new HashSet<>();
 
 
 	    if (previewImages != null && !previewImages.isEmpty()) {
-	        for (Image image : savedImages) {
+	        for (ImageEntity image : savedImages) {
 	            if (previewImages.contains(image.getShortName())) {
 	                // Si la imagen es parte de las imágenes previas, la eliminamos de la base de datos
 	                log.info("Removing preview image: {}", image.getShortName());
@@ -192,15 +211,15 @@ public class ProductService {
 	 * @return a set of images
 	 * @throws ImageUploadException if an error occurs while reading the file
 	 */
-	private Set<Image> uploadImages(MultipartFile[] files) {
-	    Set<Image> images = new HashSet<>();
+	private Set<ImageEntity> uploadImages(MultipartFile[] files) {
+	    Set<ImageEntity> images = new HashSet<>();
 
 	    if (files != null) {
 	        for (MultipartFile file : files) {
 	            try {
 	            	String shortName = file.getOriginalFilename();
 	                String fileName = UUID.randomUUID().toString() + "_" + shortName;
-	                Image image = new Image(fileName, shortName, file.getContentType(), file.getBytes());
+	                ImageEntity image = new ImageEntity(fileName, shortName, file.getContentType(), file.getBytes());
 	                images.add(image);
 	            } catch (IOException e) {
 	                log.error("Failed to process image file: {}", file.getOriginalFilename(), e);

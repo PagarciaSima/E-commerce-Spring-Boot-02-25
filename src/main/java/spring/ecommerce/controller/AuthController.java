@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.JwtRequest;
-import spring.ecommerce.model.JwtResponse;
-import spring.ecommerce.model.User;
+import spring.ecommerce.dto.JwtRequestDto;
+import spring.ecommerce.dto.JwtResponseDto;
+import spring.ecommerce.entity.UserEntity;
 import spring.ecommerce.service.JWTGeneratorService;
 import spring.ecommerce.service.UserService;
 
@@ -45,13 +45,13 @@ public class AuthController {
      *
      * @param jwtRequest The authentication request containing the username and password.
      *                   It should include the user's credentials for login.
-     * @return A {@link ResponseEntity} containing a {@link JwtResponse} with the authenticated 
+     * @return A {@link ResponseEntity} containing a {@link JwtResponseDto} with the authenticated 
      *         user's information and a JWT token, or an error response in case of failure.
      *         The response will have a status of 200 OK if the login is successful.
      *         If authentication fails, the response will return a 401 Unauthorized status.
      */
     @PostMapping("/authenticate")
-    public ResponseEntity<?> login(@RequestBody JwtRequest jwtRequest) {
+    public ResponseEntity<?> login(@RequestBody JwtRequestDto jwtRequest) {
         log.info("Attempting login for user: {}", jwtRequest.getUserName());
 
         // Authenticate the user
@@ -66,11 +66,11 @@ public class AuthController {
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString()
         );
 
-        User user = userService.findByUserName(jwtRequest.getUserName());
+        UserEntity user = userService.findByUserName(jwtRequest.getUserName());
 
         // Generate JWT token
         String token = jwtGenerator.getToken(jwtRequest.getUserName());
-        return ResponseEntity.ok(new JwtResponse(user, token));
+        return ResponseEntity.ok(new JwtResponseDto(user, token));
     }
 
 }

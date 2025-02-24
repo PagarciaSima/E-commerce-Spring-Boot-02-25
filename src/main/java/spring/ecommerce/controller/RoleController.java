@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.Role;
+import spring.ecommerce.entity.RoleEntity;
 import spring.ecommerce.service.RoleService;
 
 /**
@@ -32,15 +32,15 @@ public class RoleController {
 	 * Creates a new role in the system.
 	 *
 	 * @param role The role object containing role details.
-	 * @return A {@link ResponseEntity} containing the created {@link Role} or an
+	 * @return A {@link ResponseEntity} containing the created {@link RoleEntity} or an
 	 *         error response in case of failure.
 	 */
 	@PostMapping("/createNewRole")
-	public ResponseEntity<Role> createNewRole(@RequestBody @Valid Role role) {
+	public ResponseEntity<RoleEntity> createNewRole(@RequestBody @Valid RoleEntity role) {
 		log.info("Attempting to create a new role: {}", role.getRoleName());
 
 		try {
-			Role createdRole = roleService.createNewRole(role);
+			RoleEntity createdRole = roleService.createNewRole(role);
 			log.info("Role created successfully: {}", createdRole.getRoleName());
 			return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
 		} catch (Exception e) {

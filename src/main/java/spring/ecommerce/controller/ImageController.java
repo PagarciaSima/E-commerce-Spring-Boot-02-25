@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.Image;
+import spring.ecommerce.entity.ImageEntity;
 import spring.ecommerce.service.ImageService;
 
 @RestController
@@ -42,7 +42,7 @@ public class ImageController {
      */
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
-        Image savedImage = imageService.saveImage(file);
+        ImageEntity savedImage = imageService.saveImage(file);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedImage);
     }
 
@@ -59,7 +59,7 @@ public class ImageController {
      */
     @GetMapping("/image/{id}")
     public ResponseEntity<String> getImageAsBase64(@PathVariable Long id) {
-        Optional<Image> image = imageService.getImageById(id);
+        Optional<ImageEntity> image = imageService.getImageById(id);
         if (image.isPresent()) {
             String base64Image = Base64.getEncoder().encodeToString(image.get().getPicByte());
             return ResponseEntity.ok(base64Image);
@@ -75,7 +75,7 @@ public class ImageController {
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getImageByName(@PathVariable String name) {
-        Optional<Image> image = imageService.getImageByName(name);
+        Optional<ImageEntity> image = imageService.getImageByName(name);
         return image.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
@@ -98,8 +98,8 @@ public class ImageController {
      * @return a ResponseEntity with the list of images or an error response
      */
     @GetMapping
-    public ResponseEntity<List<Image>> getAllImages() {
-        List<Image> images = imageService.getAllImages();
+    public ResponseEntity<List<ImageEntity>> getAllImages() {
+        List<ImageEntity> images = imageService.getAllImages();
         return ResponseEntity.ok(images);
     }
 }

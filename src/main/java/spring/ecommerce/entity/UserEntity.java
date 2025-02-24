@@ -1,4 +1,4 @@
-package spring.ecommerce.model;
+package spring.ecommerce.entity;
 
 import java.util.Set;
 
@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -20,7 +21,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+@Table(name = "user")
+public class UserEntity {
 	@Id
 	@NotBlank(message = "Username can not be empty")
 	private String userName;
@@ -41,5 +43,5 @@ public class User {
 	    joinColumns = @JoinColumn(name = "USER_ID"),
 	    inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
 	)
-	private Set<Role> role;
+	private Set<RoleEntity> role;
 }

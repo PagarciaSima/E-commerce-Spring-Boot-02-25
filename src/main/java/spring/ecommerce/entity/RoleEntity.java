@@ -1,7 +1,8 @@
-package spring.ecommerce.model;
+package spring.ecommerce.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Role {
+@Table(name = "role")
+public class RoleEntity {
 
 	@Id
 	@NotBlank(message = "Role name can not be empty")

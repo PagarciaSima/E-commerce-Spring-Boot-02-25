@@ -20,7 +20,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.Product;
+import spring.ecommerce.entity.ProductEntity;
 
 @Service
 @Slf4j
@@ -32,11 +32,11 @@ public class PdfService {
 	 * Generates a PDF file containing a product list displayed in a table format. 
 	 * The PDF includes a logo in the top-left corner, a centered title, and a table with product information.
 	 *
-	 * @param products A list of {@link Product} objects containing the data to be displayed in the PDF.
+	 * @param products A list of {@link ProductEntity} objects containing the data to be displayed in the PDF.
 	 * @return A byte array representing the generated PDF file.
 	 * @throws IOException If an error occurs while creating or writing the PDF.
 	 */
-	public byte[] generateProductListPdf(List<Product> products) throws IOException {
+	public byte[] generateProductListPdf(List<ProductEntity> products) throws IOException {
 		log.debug("Generating PDF List Products file");
 	    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 	    PdfWriter writer = new PdfWriter(byteArrayOutputStream);
@@ -62,7 +62,7 @@ public class PdfService {
 	    for (int i = 0; i < totalPages; i++) {
 	        int fromIndex = i * pageSize;
 	        int toIndex = Math.min(fromIndex + pageSize, totalProducts);
-	        List<Product> subList = products.subList(fromIndex, toIndex);
+	        List<ProductEntity> subList = products.subList(fromIndex, toIndex);
 
 	        // Generar la tabla con los productos de la sublista
 	        Table table = generateTable(subList);
@@ -82,10 +82,10 @@ public class PdfService {
      * Generates a table containing product information with predefined column widths.
      * The table includes headers with a green background and white text, and it is filled with product data.
      *
-     * @param products A list of {@link Product} objects containing the data to populate the table.
+     * @param products A list of {@link ProductEntity} objects containing the data to populate the table.
      * @return A {@link Table} object populated with the product details.
      */
-	private Table generateTable(List<Product> products) {
+	private Table generateTable(List<ProductEntity> products) {
 		log.debug("Generating List Products table");
 		float[] columnWidths = {2, 2, 3, 2, 2};
         Table table = new Table(columnWidths).useAllAvailableWidth();
@@ -102,7 +102,7 @@ public class PdfService {
         table.addHeaderCell(new Cell().add(new Paragraph("Discounted Price")).setBackgroundColor(customGreen).setFontColor(DeviceRgb.WHITE).setBold());
 
         // Rellenar la tabla con productos
-        for (Product product : products) {
+        for (ProductEntity product : products) {
         	table.addCell(String.valueOf(product.getProductId()));
             table.addCell(product.getProductName());
             table.addCell(product.getProductDescription());

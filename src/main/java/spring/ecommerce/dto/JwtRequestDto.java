@@ -1,11 +1,11 @@
-package spring.ecommerce.model;
+package spring.ecommerce.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class JwtRequest {
+public class JwtRequestDto {
 
 	private String userName;
 	private String userPassword;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.opencsv.CSVWriter;
 
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.Product;
+import spring.ecommerce.entity.ProductEntity;
 
 @Service
 @Slf4j
@@ -20,10 +20,10 @@ public class CsvService {
      * Generates a CSV file containing a list of products. The CSV includes headers
      * and product details.
      *
-     * @param products A list of {@link Product} objects to include in the CSV.
+     * @param products A list of {@link ProductEntity} objects to include in the CSV.
      * @return A byte array representing the generated CSV file.
      */
-	public byte[] generateProductListCsv(List<Product> products) {
+	public byte[] generateProductListCsv(List<ProductEntity> products) {
 	    log.info("Starting CSV generation for {} products.", products.size());
 
 	    try (
@@ -56,9 +56,9 @@ public class CsvService {
 	    }
 	}
 
-	private void loadProductsInCsv(List<Product> products, CSVWriter csvWriter) {
+	private void loadProductsInCsv(List<ProductEntity> products, CSVWriter csvWriter) {
 	    int count = 0;
-	    for (Product product : products) {
+	    for (ProductEntity product : products) {
 	        String[] data = { 
 	                String.valueOf(product.getProductId()), 
 	                product.getProductName(),

@@ -26,12 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.dto.PageResponseDto;
+import spring.ecommerce.entity.ImageEntity;
+import spring.ecommerce.entity.ProductEntity;
 import spring.ecommerce.files.CsvService;
 import spring.ecommerce.files.ExcelService;
 import spring.ecommerce.files.PdfService;
-import spring.ecommerce.model.Image;
-import spring.ecommerce.model.PageResponse;
-import spring.ecommerce.model.Product;
 import spring.ecommerce.service.ProductService;
 
 @RestController
@@ -55,28 +55,28 @@ public class ProductController {
 	/**
 	 * Creates a new product and optionally associates images with it.
 	 * <p>
-	 * This method receives a {@link Product} object and a list of image files, validates them, and associates the images with the product.
-	 * It then calls the {@link productService#addNewProduct(Product, MultipartFile[])} method to save the product in the database.
+	 * This method receives a {@link ProductEntity} object and a list of image files, validates them, and associates the images with the product.
+	 * It then calls the {@link productService#addNewProduct(ProductEntity, MultipartFile[])} method to save the product in the database.
 	 * If the product and images are successfully created, it returns a {@link ResponseEntity} with the created product and a {@link HttpStatus#CREATED} status.
 	 * If an error occurs during the process, an error message is logged, and a {@link ResponseEntity} with an {@link HttpStatus#INTERNAL_SERVER_ERROR} status is returned.
 	 * </p>
 	 *
-	 * @param product the {@link Product} object to be created, including details such as name, description, price, etc.
+	 * @param product the {@link ProductEntity} object to be created, including details such as name, description, price, etc.
 	 * @param files an array of {@link MultipartFile} objects representing images to be associated with the product. This parameter is optional.
-	 * @return a {@link ResponseEntity} containing the created {@link Product} object if successful, or an error response if an exception occurs.
+	 * @return a {@link ResponseEntity} containing the created {@link ProductEntity} object if successful, or an error response if an exception occurs.
 	 * @throws Exception if an error occurs while creating the product or uploading the images.
 	 */
 	@PostMapping(value = "/product", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> addNewProduct(
-			@RequestPart("product") @Valid Product product,
+			@RequestPart("product") @Valid ProductEntity product,
 			@RequestPart(value = "imageFile", required = false) MultipartFile[] files
 	) {
         log.info("Attempting to create a new product: {}", product.getProductName());
         try {
-        	Set<Image> images = uploadImage(files);
+        	Set<ImageEntity> images = uploadImage(files);
         	product.setProductImages(images);
         	
-        	Product createdProduct = productService.addNewProduct(product, files);
+        	ProductEntity createdProduct = productService.addNewProduct(product, files);
             log.info("Product created successfully, ID: {}", createdProduct.getProductId());
     		return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -88,14 +88,14 @@ public class ProductController {
 	/**
 	 * Updates an existing product and its associated images.
 	 * <p>
-	 * This method receives a {@link Product} object and updates the product with the specified {@code productId}.
+	 * This method receives a {@link ProductEntity} object and updates the product with the specified {@code productId}.
 	 * It can also update the associated images by receiving new images and/or the IDs of existing images that need to be retained.
-	 * The method calls the {@link productService#updateProduct(Integer, Product, List, List)} to perform the update operation.
+	 * The method calls the {@link productService#updateProduct(Integer, ProductEntity, List, List)} to perform the update operation.
 	 * If the product is successfully updated, a success message is returned with a {@link HttpStatus#OK} status.
 	 * If any error occurs during the process, an error message is returned with a {@link HttpStatus#BAD_REQUEST} status.
 	 * </p>
 	 *
-	 * @param product the {@link Product} object containing the updated product details.
+	 * @param product the {@link ProductEntity} object containing the updated product details.
 	 * @param productId the ID of the product to be updated.
 	 * @param newImages a list of {@link MultipartFile} objects representing new images to be associated with the product (optional).
 	 * @param existingImages a list of image names or IDs of existing images to be retained (optional).
@@ -104,7 +104,7 @@ public class ProductController {
 	 */
 	@PutMapping(value = "/product/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateProduct(
-		@RequestPart("product") @Valid Product product,
+		@RequestPart("product") @Valid ProductEntity product,
 		@PathVariable("productId") Integer productId,
 		@RequestPart(value = "imageFile", required = false) List<MultipartFile> newImages,
 	    @RequestPart(value = "existingImages", required = false) List<String> existingImages
@@ -142,6 +142,18 @@ public class ProductController {
 		}
 	}
 	
+	/**
+	 * Retrieves a paginated list of products ordered by their name.
+	 * 
+	 * This method fetches a list of products from the service, ordered by the product name,
+	 * and returns the result as a paginated response. It takes in the page number and the 
+	 * size of the page as query parameters. The default page is 0, and the default page size is 10.
+	 * 
+	 * @param page The page number to retrieve. Defaults to 0 if not provided.
+	 * @param size The number of products per page. Defaults to 10 if not provided.
+	 * @return A ResponseEntity containing a paginated list of products, or an internal server error
+	 *         if an exception occurs during the retrieval.
+	 */
 	@GetMapping()
 	public ResponseEntity<?> getAllProductsOrderedByNameWithPagination(
 	    @RequestParam(defaultValue = "0") int page, 
@@ -150,14 +162,13 @@ public class ProductController {
 	    log.info("Fetching products for page {} with size {}", page, size);
 
 	    try {
-	        PageResponse<Product> pagedResponse = productService.getAllProductsOrderedByNameWithPagination(page, size);
+	        PageResponseDto<ProductEntity> pagedResponse = productService.getAllProductsOrderedByNameWithPagination(page, size);
 	        return ResponseEntity.ok(pagedResponse);
 	    } catch (Exception e) {
 	        log.error("Error occurred while retrieving paginated product list", e.getMessage(), e);
 	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-
 	
 	/**
 	 * Retrieves a product by its ID.
@@ -168,12 +179,12 @@ public class ProductController {
 	 * </p>
 	 *
 	 * @param productId the ID of the product to be retrieved
-	 * @return a {@link ResponseEntity} containing the {@link Product} if found, or an HTTP 404 Not Found status if the product is not found
+	 * @return a {@link ResponseEntity} containing the {@link ProductEntity} if found, or an HTTP 404 Not Found status if the product is not found
 	 */
 	@GetMapping("/product/{productId}")
-	public ResponseEntity<Product> getProduct(@PathVariable("productId") Integer productId) {
+	public ResponseEntity<ProductEntity> getProduct(@PathVariable("productId") Integer productId) {
 	    log.info("Attempting to get images for product ID: {}", productId);
-        Product product = productService.getProductById(productId);  
+        ProductEntity product = productService.getProductById(productId);  
         if (product == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  
         }
@@ -219,7 +230,7 @@ public class ProductController {
 	public ResponseEntity<byte[]> generateProductListPdf() {
 	    try {
 	        // Obtener todos los productos ordenados por nombre
-	        List<Product> products = productService.getAllProductsOrderedByName();
+	        List<ProductEntity> products = productService.getAllProductsOrderedByName();
 
 	        // Llamar al servicio para generar el PDF sin paginación
 	        byte[] pdfBytes = pdfService.generateProductListPdf(products);
@@ -247,7 +258,7 @@ public class ProductController {
         log.info("Request received to download product list as CSV.");
 
         try {
-            List<Product> products = productService.getAllProductsOrderedByName();
+            List<ProductEntity> products = productService.getAllProductsOrderedByName();
             log.debug("Fetched {} products from the database.", products.size());
 
             byte[] csvData = csvService.generateProductListCsv(products);
@@ -285,7 +296,7 @@ public class ProductController {
         log.info("Request received to download product list as Excel.");
 
         try {
-            List<Product> products = productService.getAllProductsOrderedByName();
+            List<ProductEntity> products = productService.getAllProductsOrderedByName();
             log.debug("Fetched {} products from the database.", products.size());
 
             byte[] excelData = excelService.generateProductListExcel(products);
@@ -318,18 +329,18 @@ public class ProductController {
      */
 
 	/**
-	 * Uploads and processes multiple image files, returning a set of {@link Image} objects.
+	 * Uploads and processes multiple image files, returning a set of {@link ImageEntity} objects.
 	 * <p>
 	 * This method receives an array of {@link MultipartFile} objects representing image files to be uploaded.
-	 * It checks each file for size and processes it to create {@link Image} objects. If any file exceeds the maximum allowed size,
+	 * It checks each file for size and processes it to create {@link ImageEntity} objects. If any file exceeds the maximum allowed size,
 	 * it logs a warning and skips that file. If there is an error while processing a file, it logs an error and skips the file.
-	 * The method returns a {@link Set} containing all successfully processed {@link Image} objects.
+	 * The method returns a {@link Set} containing all successfully processed {@link ImageEntity} objects.
 	 * </p>
 	 *
 	 * @param multipartFiles an array of {@link MultipartFile} objects representing the image files to be uploaded.
-	 * @return a {@link Set} containing the successfully uploaded and processed {@link Image} objects. If no files are uploaded or processed, an empty set is returned.
+	 * @return a {@link Set} containing the successfully uploaded and processed {@link ImageEntity} objects. If no files are uploaded or processed, an empty set is returned.
 	 */
-	public Set<Image> uploadImage(MultipartFile[] multipartFiles) {
+	public Set<ImageEntity> uploadImage(MultipartFile[] multipartFiles) {
 	    if (multipartFiles == null || multipartFiles.length == 0) {
 	        return Set.of();
 	    }
@@ -341,7 +352,7 @@ public class ProductController {
 	                    log.warn("File {} exceeds the maximum allowed size", file.getOriginalFilename());
 	                    return null;
 	                }
-	                return new Image(
+	                return new ImageEntity(
 	                    file.getOriginalFilename(),
 	                    file.getOriginalFilename(),
 	                    file.getContentType(),

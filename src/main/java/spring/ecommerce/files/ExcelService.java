@@ -4,7 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
-import spring.ecommerce.model.Product;
+import spring.ecommerce.entity.ProductEntity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,10 +17,10 @@ public class ExcelService {
     /**
      * Generates an Excel file containing a list of products.
      *
-     * @param products A list of {@link Product} objects to include in the Excel file.
+     * @param products A list of {@link ProductEntity} objects to include in the Excel file.
      * @return A byte array representing the generated Excel file.
      */
-    public byte[] generateProductListExcel(List<Product> products) {
+    public byte[] generateProductListExcel(List<ProductEntity> products) {
         log.info("Starting Excel generation for {} products.", products.size());
 
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -77,12 +77,12 @@ public class ExcelService {
      * Each product's details (ID, name, description, actual price, and discounted price)
      * are written into a new row in the Excel sheet.
      * 
-     * @param products The list of {@link Product} objects to be written to the Excel sheet.
+     * @param products The list of {@link ProductEntity} objects to be written to the Excel sheet.
      * @param sheet The {@link Sheet} object where the product data will be written.
      */
-    private void loadProductsInExcel(List<Product> products, Sheet sheet) {
+    private void loadProductsInExcel(List<ProductEntity> products, Sheet sheet) {
         int rowNum = 1; // Comienza a escribir desde la segunda fila (después de la cabecera)
-        for (Product product : products) {
+        for (ProductEntity product : products) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(product.getProductId());
             row.createCell(1).setCellValue(product.getProductName());

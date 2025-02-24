@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
-import spring.ecommerce.model.User;
+import spring.ecommerce.entity.UserEntity;
 
 @Service
 @AllArgsConstructor
@@ -28,7 +28,7 @@ public class CustomUserDetailService implements UserDetailsService{
 	 */
 	@Override
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        User user = userService.findByUserName(userName);
+        UserEntity user = userService.findByUserName(userName);
         
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + userName);

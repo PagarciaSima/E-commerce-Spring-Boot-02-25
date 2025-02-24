@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.RoleDao;
+import spring.ecommerce.entity.RoleEntity;
 import spring.ecommerce.exception.RoleNotFoundException;
-import spring.ecommerce.model.Role;
 
 import java.util.Optional;
 
@@ -22,9 +22,9 @@ public class RoleService {
      * @param role the role to be saved
      * @return the saved role
      */
-    public Role createNewRole(Role role) {
+    public RoleEntity createNewRole(RoleEntity role) {
         log.info("Creating a new role: {}", role.getRoleName());
-        Role savedRole = roleDao.save(role);
+        RoleEntity savedRole = roleDao.save(role);
         log.info("Role '{}' created successfully.", savedRole.getRoleName());
         return savedRole;
     }
@@ -36,7 +36,7 @@ public class RoleService {
      * @return the found role
      * @throws RoleNotFoundException if the role does not exist
      */
-    public Role findByRoleName(String roleName) {
+    public RoleEntity findByRoleName(String roleName) {
         log.info("Searching for role: {}", roleName);
         return Optional.ofNullable(roleDao.findByRoleName(roleName))
                 .orElseThrow(() -> {
