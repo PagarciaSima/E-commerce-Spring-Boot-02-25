@@ -1,6 +1,7 @@
 package spring.ecommerce.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -228,6 +229,21 @@ public class ProductService {
 	        }
 	    }
 	    return images;
+	}
+
+	public List<ProductEntity> getProductDetailsById(boolean isSingleProductCheckOut, Integer productId) {
+		// Buy a single product
+		if(isSingleProductCheckOut) {
+			List<ProductEntity> productList = new ArrayList<>();
+			ProductEntity product = productDao.findById(productId).get();		
+			productList.add(product);
+			return productList;
+		} 
+		// Checkout entire car
+		else {
+			
+		}
+		return new ArrayList<>();
 	}
 
 }

@@ -171,6 +171,33 @@ public class ProductController {
 	}
 	
 	/**
+	 * Retrieves product details based on the provided product ID.
+	 * <p>
+	 * This method fetches the details of a product using the product ID and checks if the product 
+	 * is being purchased as a single product checkout. It returns the details of the product in 
+	 * the form of a list if found, or an HTTP 500 Internal Server Error status if there is an issue 
+	 * during the retrieval process.
+	 * </p>
+	 *
+	 * @param isSingleProductCheckout a boolean indicating if the checkout is for a single product (true) or not (false)
+	 * @param productId the ID of the product whose details are to be retrieved
+	 * @return a {@link ResponseEntity} containing a list of {@link ProductEntity} if the product details are successfully retrieved, 
+	 *         or an HTTP 500 Internal Server Error if an exception occurs during the retrieval
+	 */
+	@GetMapping("/getProductDetails/{isSingleProductCheckout}/{productId}")
+	public ResponseEntity<?> getProductDetails(@PathVariable boolean isSingleProductCheckout, @PathVariable Integer productId) {
+		try {
+		    log.info("Attempting to retrieve product details for product ID: {} with single product checkout: {}", productId, isSingleProductCheckout);	    
+		    // Retrieve product details by product ID
+		    List<ProductEntity> productDetails = productService.getProductDetailsById(isSingleProductCheckout, productId);
+		    return ResponseEntity.ok(productDetails);
+		} catch (Exception e) {
+			log.error("Error while retrieving product details");
+		    return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	/**
 	 * Retrieves a product by its ID.
 	 * <p>
 	 * This method attempts to fetch a product from the database using the provided product ID. 
