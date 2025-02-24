@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,8 +27,10 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.files.CsvService;
+import spring.ecommerce.files.ExcelService;
 import spring.ecommerce.files.PdfService;
 import spring.ecommerce.model.Image;
+import spring.ecommerce.model.PageResponse;
 import spring.ecommerce.model.Product;
 import spring.ecommerce.service.ProductService;
 
@@ -45,6 +48,8 @@ public class ProductController {
     private final PdfService pdfService; // Servicio para generar el PDF
 	private final ProductService productService;
 	private final CsvService csvService;
+	private final ExcelService excelService;
+
 	private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 	/**
@@ -115,51 +120,6 @@ public class ProductController {
 	    }
 	}
 
-	/**
-     * Processes and converts uploaded image files into a set of {@link Image} objects.
-     *
-     * @param multipartFiles The array of uploaded image files.
-     * @return A {@link Set} containing {@link Image} objects created from the files.
-     */
-
-	/**
-	 * Uploads and processes multiple image files, returning a set of {@link Image} objects.
-	 * <p>
-	 * This method receives an array of {@link MultipartFile} objects representing image files to be uploaded.
-	 * It checks each file for size and processes it to create {@link Image} objects. If any file exceeds the maximum allowed size,
-	 * it logs a warning and skips that file. If there is an error while processing a file, it logs an error and skips the file.
-	 * The method returns a {@link Set} containing all successfully processed {@link Image} objects.
-	 * </p>
-	 *
-	 * @param multipartFiles an array of {@link MultipartFile} objects representing the image files to be uploaded.
-	 * @return a {@link Set} containing the successfully uploaded and processed {@link Image} objects. If no files are uploaded or processed, an empty set is returned.
-	 */
-	public Set<Image> uploadImage(MultipartFile[] multipartFiles) {
-	    if (multipartFiles == null || multipartFiles.length == 0) {
-	        return Set.of();
-	    }
-
-	    return Arrays.stream(multipartFiles)
-	        .map(file -> {
-	            try {
-	                if (file.getSize() > MAX_IMAGE_SIZE) {
-	                    log.warn("File {} exceeds the maximum allowed size", file.getOriginalFilename());
-	                    return null;
-	                }
-	                return new Image(
-	                    file.getOriginalFilename(),
-	                    file.getOriginalFilename(),
-	                    file.getContentType(),
-	                    file.getBytes()
-	                );
-	            } catch (IOException e) {
-	                log.error("Error processing file: {}", file.getOriginalFilename(), e);
-	                return null;
-	            }
-	        })
-	        .filter(image -> image != null)
-	        .collect(Collectors.toSet());
-	}
 	
 	/**
 	 * Retrieves a list of all products.
@@ -171,7 +131,7 @@ public class ProductController {
 	 *
 	 * @return a {@link ResponseEntity} containing the list of all products if successful, or an error response with an HTTP 500 status if an error occurs.
 	 */
-	@GetMapping()
+	@GetMapping("/all")
 	public ResponseEntity<?> getAllProducts() {
         log.info("Attempting to get product list");
 		try {
@@ -181,6 +141,23 @@ public class ProductController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@GetMapping()
+	public ResponseEntity<?> getAllProductsOrderedByNameWithPagination(
+	    @RequestParam(defaultValue = "0") int page, 
+	    @RequestParam(defaultValue = "10") int size) {
+
+	    log.info("Fetching products for page {} with size {}", page, size);
+
+	    try {
+	        PageResponse<Product> pagedResponse = productService.getAllProductsOrderedByNameWithPagination(page, size);
+	        return ResponseEntity.ok(pagedResponse);
+	    } catch (Exception e) {
+	        log.error("Error occurred while retrieving paginated product list", e.getMessage(), e);
+	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	
 	/**
 	 * Retrieves a product by its ID.
@@ -294,5 +271,89 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    
+    /**
+     * Handles the request to download the product list as an Excel file.
+     * This method generates an Excel file containing product details and sends it 
+     * as a downloadable response to the client.
+     * 
+     * @return A {@link ResponseEntity} containing the generated Excel file as a byte array, 
+     *         or an HTTP 500 Internal Server Error if there was an issue during file generation.
+     */
+    @GetMapping("/excel")
+    public ResponseEntity<byte[]> downloadProductListExcel() {
+        log.info("Request received to download product list as Excel.");
+
+        try {
+            List<Product> products = productService.getAllProductsOrderedByName();
+            log.debug("Fetched {} products from the database.", products.size());
+
+            byte[] excelData = excelService.generateProductListExcel(products);
+
+            if (excelData == null || excelData.length == 0) {
+                log.warn("Excel generation failed or returned empty data.");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            // Set HTTP headers for file download
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "product_list.xlsx");
+
+            log.info("Excel file generated successfully. Sending response to client.");
+
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error occurred while generating the Excel file.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Processes and converts uploaded image files into a set of {@link Image} objects.
+     *
+     * @param multipartFiles The array of uploaded image files.
+     * @return A {@link Set} containing {@link Image} objects created from the files.
+     */
+
+	/**
+	 * Uploads and processes multiple image files, returning a set of {@link Image} objects.
+	 * <p>
+	 * This method receives an array of {@link MultipartFile} objects representing image files to be uploaded.
+	 * It checks each file for size and processes it to create {@link Image} objects. If any file exceeds the maximum allowed size,
+	 * it logs a warning and skips that file. If there is an error while processing a file, it logs an error and skips the file.
+	 * The method returns a {@link Set} containing all successfully processed {@link Image} objects.
+	 * </p>
+	 *
+	 * @param multipartFiles an array of {@link MultipartFile} objects representing the image files to be uploaded.
+	 * @return a {@link Set} containing the successfully uploaded and processed {@link Image} objects. If no files are uploaded or processed, an empty set is returned.
+	 */
+	public Set<Image> uploadImage(MultipartFile[] multipartFiles) {
+	    if (multipartFiles == null || multipartFiles.length == 0) {
+	        return Set.of();
+	    }
+
+	    return Arrays.stream(multipartFiles)
+	        .map(file -> {
+	            try {
+	                if (file.getSize() > MAX_IMAGE_SIZE) {
+	                    log.warn("File {} exceeds the maximum allowed size", file.getOriginalFilename());
+	                    return null;
+	                }
+	                return new Image(
+	                    file.getOriginalFilename(),
+	                    file.getOriginalFilename(),
+	                    file.getContentType(),
+	                    file.getBytes()
+	                );
+	            } catch (IOException e) {
+	                log.error("Error processing file: {}", file.getOriginalFilename(), e);
+	                return null;
+	            }
+	        })
+	        .filter(image -> image != null)
+	        .collect(Collectors.toSet());
+	}
 
 }

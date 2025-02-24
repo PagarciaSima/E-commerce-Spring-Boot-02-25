@@ -20,6 +20,7 @@ import spring.ecommerce.dao.ProductDao;
 import spring.ecommerce.exception.ImageUploadException; // Nueva excepción personalizada
 import spring.ecommerce.exception.ProductNotFoundException;
 import spring.ecommerce.model.Image;
+import spring.ecommerce.model.PageResponse;
 import spring.ecommerce.model.Product;
 
 @Service
@@ -68,6 +69,24 @@ public class ProductService {
 	        log.warn("No products found.");
 	    }
 	    return products;
+	}
+	
+	public PageResponse<Product> getAllProductsOrderedByNameWithPagination(int page, int size) {
+	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productName")));
+	    Page<Product> productPage = productDao.findAll(pageable);
+
+	    return new PageResponse<>(
+	        productPage.getContent(),
+	        productPage.getTotalPages(),
+	        productPage.getTotalElements(),
+	        productPage.getSize(),
+	        productPage.getNumber()
+	    );
+	}
+
+	
+	public List<Product> getAllProductsOrderedByName() {
+	    return productDao.findAll(Sort.by(Sort.Order.asc("productName")));
 	}
 
 	/**
@@ -190,16 +209,6 @@ public class ProductService {
 	        }
 	    }
 	    return images;
-	}
-	
-	public List<Product> getAllProductsOrderedByNameWithPagination(int page, int size) {
-	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productName")));
-	    Page<Product> productPage = productDao.findAll(pageable);
-	    return productPage.getContent();
-	}
-	
-	public List<Product> getAllProductsOrderedByName() {
-	    return productDao.findAll(Sort.by(Sort.Order.asc("productName")));
 	}
 
 }
