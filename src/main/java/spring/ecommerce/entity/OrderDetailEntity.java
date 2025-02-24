@@ -1,9 +1,11 @@
 package spring.ecommerce.entity;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,9 +25,13 @@ public class OrderDetailEntity {
 	private String orderAlternateContactNumber;
 	private String orderStatus;
 	private Double orderAmount;
-	
+	@OneToOne
+	private ProductEntity product;
+	@OneToOne
+	private UserEntity user;
 	public OrderDetailEntity(String orderFullName, String orderFullOrder, String orderContactNumber,
-			String orderAlternateContactNumber, String orderStatus, Double orderAmount) {
+			String orderAlternateContactNumber, String orderStatus, Double orderAmount, ProductEntity product,
+			UserEntity user) {
 		super();
 		this.orderFullName = orderFullName;
 		this.orderFullOrder = orderFullOrder;
@@ -33,5 +39,9 @@ public class OrderDetailEntity {
 		this.orderAlternateContactNumber = orderAlternateContactNumber;
 		this.orderStatus = orderStatus;
 		this.orderAmount = orderAmount;
+		this.product = product;
+		this.user = user;
 	}
+	
+
 }
