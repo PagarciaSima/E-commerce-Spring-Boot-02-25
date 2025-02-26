@@ -151,50 +151,47 @@ public class ProductController {
 	 * 
 	 * @param page The page number to retrieve. Defaults to 0 if not provided.
 	 * @param size The number of products per page. Defaults to 10 if not provided.
+	 * @param the search key.
 	 * @return A ResponseEntity containing a paginated list of products, or an internal server error
 	 *         if an exception occurs during the retrieval.
 	 */
 	@GetMapping()
 	public ResponseEntity<?> getAllProductsOrderedByNameWithPagination(
 	    @RequestParam(defaultValue = "0") int page, 
-	    @RequestParam(defaultValue = "10") int size) {
-
-	    log.info("Fetching products for page {} with size {}", page, size);
-
+	    @RequestParam(defaultValue = "10") int size,
+	    @RequestParam(defaultValue = "") String searchKey
+	) {
 	    try {
-	        PageResponseDto<ProductEntity> pagedResponse = productService.getAllProductsOrderedByNameWithPagination(page, size);
+	        // Usamos el servicio para obtener los productos filtrados o no según el searchKey
+	        PageResponseDto<ProductEntity> pagedResponse = productService.getProductsBySearchKeyWithPagination(page, size, searchKey);
 	        return ResponseEntity.ok(pagedResponse);
 	    } catch (Exception e) {
 	        log.error("Error occurred while retrieving paginated product list", e.getMessage(), e);
 	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
+
 	
 	/**
-	 * Retrieves product details based on the provided product ID.
-	 * <p>
-	 * This method fetches the details of a product using the product ID and checks if the product 
-	 * is being purchased as a single product checkout. It returns the details of the product in 
-	 * the form of a list if found, or an HTTP 500 Internal Server Error status if there is an issue 
-	 * during the retrieval process.
-	 * </p>
-	 *
-	 * @param isSingleProductCheckout a boolean indicating if the checkout is for a single product (true) or not (false)
-	 * @param productId the ID of the product whose details are to be retrieved
-	 * @return a {@link ResponseEntity} containing a list of {@link ProductEntity} if the product details are successfully retrieved, 
-	 *         or an HTTP 500 Internal Server Error if an exception occurs during the retrieval
+	 * Retrieves the details of a product based on the provided product ID and checkout type.
+	 * 
+	 * @param isSingleProductCheckout A boolean flag indicating whether the checkout is for a single product.
+	 * @param productId The ID of the product whose details are to be retrieved.
+	 * @return A {@link ResponseEntity} containing the product details, or an error response in case of failure.
 	 */
-	@GetMapping("/getProductDetails/{isSingleProductCheckout}/{productId}")
-	public ResponseEntity<?> getProductDetails(@PathVariable boolean isSingleProductCheckout, @PathVariable Integer productId) {
-		try {
-		    log.info("Attempting to retrieve product details for product ID: {} with single product checkout: {}", productId, isSingleProductCheckout);	    
-		    // Retrieve product details by product ID
-		    List<ProductEntity> productDetails = productService.getProductDetailsById(isSingleProductCheckout, productId);
-		    return ResponseEntity.ok(productDetails);
-		} catch (Exception e) {
-			log.error("Error while retrieving product details");
-		    return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	@GetMapping("/getProductDetails")
+	public ResponseEntity<?> getProductDetails(
+	    @RequestParam boolean isSingleProductCheckout, 
+	    @RequestParam Integer productId) {
+	    try {
+	        log.info("Attempting to retrieve product details for product ID: {} with single product checkout: {}", productId, isSingleProductCheckout);
+	        // Retrieve product details by product ID
+	        List<ProductEntity> productDetails = productService.getProductDetailsById(isSingleProductCheckout, productId);
+	        return ResponseEntity.ok(productDetails);
+	    } catch (Exception e) {
+	        log.error("Error while retrieving product details");
+	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
 	
 	/**

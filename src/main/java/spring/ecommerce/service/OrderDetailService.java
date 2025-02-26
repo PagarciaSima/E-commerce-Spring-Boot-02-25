@@ -39,7 +39,7 @@ public class OrderDetailService {
     public void placeOrder(OrderInputDto orderInputDto) {
         log.info("Starting order placement for user: {}", orderInputDto.getFullName());
 
-        List<OrderProductQuantityDto> productQuantityList = orderInputDto.getOrderProducQuantityList();
+        List<OrderProductQuantityDto> productQuantityList = orderInputDto.getOrderProductQuantityList();
 
         for (OrderProductQuantityDto orderProductQuantityDto : productQuantityList) {
             log.debug("Processing product with ID: {}", orderProductQuantityDto.getProductId());
@@ -49,8 +49,12 @@ public class OrderDetailService {
                         log.error("Product with ID {} not found", orderProductQuantityDto.getProductId());
                         return new RuntimeException("Product not found");
                     });
+            
+            double priceToUse = product.getProductDiscountedPrice() > 0 
+                    ? product.getProductDiscountedPrice() 
+                    : product.getProductActualPrice();
 
-            double orderAmount = product.getProductActualPrice() * orderProductQuantityDto.getQuantity();
+            double orderAmount = priceToUse * orderProductQuantityDto.getQuantity();
 
             OrderDetailEntity orderDetailEntity = new OrderDetailEntity(
                     orderInputDto.getFullName(),

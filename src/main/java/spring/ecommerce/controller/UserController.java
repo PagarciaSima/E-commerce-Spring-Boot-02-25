@@ -33,14 +33,23 @@ public class UserController {
     /**
      * Registers a new user in the system.
      * The password is securely hashed before storing it.
+     * If the username already exists, the request is rejected.
      *
      * @param user The user object containing registration details.
-     * @return A {@link ResponseEntity} containing the created {@link UserEntity} 
-     *         or an error response in case of failure.
+     * @return A {@link ResponseEntity} containing:
+     *         <ul>
+     *           <li>The created {@link UserEntity} with status {@code 201 CREATED} if successful.</li>
+     *           <li>A {@code 400 BAD REQUEST} status with an error message if the username is already taken.</li>
+     *           <li>A {@code 500 INTERNAL SERVER ERROR} status in case of an unexpected failure.</li>
+     *         </ul>
      */
     @PostMapping("/register")
-    public ResponseEntity<UserEntity> createNewUser(@RequestBody @Valid UserEntity user) {
+    public ResponseEntity<?> createNewUser(@RequestBody @Valid UserEntity user) {
         log.info("Attempting to create a new user: {}", user.getUserName());
+        if (userService.existsByUserName(user.getUserName())) {
+            log.warn("User already exists with username: {}", user.getUserName());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+        }
 
         try {
             user.setUserPassword(bcryptPasswordEncoder.encode(user.getUserPassword()));

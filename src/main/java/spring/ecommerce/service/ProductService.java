@@ -84,18 +84,21 @@ public class ProductService {
 	 * @return A PageResponse object containing the list of products, total number of pages, 
 	 *         total number of elements, page size, and the current page number.
 	 */
-	public PageResponseDto<ProductEntity> getAllProductsOrderedByNameWithPagination(int page, int size) {
+	public PageResponseDto<ProductEntity> getProductsBySearchKeyWithPagination(int page, int size, String searchKey) {
 	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productName")));
-	    Page<ProductEntity> productPage = productDao.findAll(pageable);
 
-	    return new PageResponseDto<>(
-	        productPage.getContent(),
-	        productPage.getTotalPages(),
-	        productPage.getTotalElements(),
-	        productPage.getSize(),
-	        productPage.getNumber()
-	    );
+	    if (searchKey != null && !searchKey.isEmpty()) {
+	        // Filtrar por el searchKey (por ejemplo, nombre del producto)
+	        Page<ProductEntity> productPage = productDao.findByProductNameContainingIgnoreCase(searchKey, pageable);
+	        return new PageResponseDto<>(productPage.getContent(), productPage.getTotalPages(), productPage.getTotalElements(), productPage.getSize(), productPage.getNumber());
+	    } else {
+	        // Si no hay searchKey, retornar todos los productos
+	        Page<ProductEntity> productPage = productDao.findAll(pageable);
+	        return new PageResponseDto<>(productPage.getContent(), productPage.getTotalPages(), productPage.getTotalElements(), productPage.getSize(), productPage.getNumber());
+	    }
 	}
+
+
 	
 	/**
 	 * Retrieves a list of all products ordered by their name in ascending order.

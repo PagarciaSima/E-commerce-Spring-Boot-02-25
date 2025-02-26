@@ -10,4 +10,6 @@ public interface UserDao extends CrudRepository<UserEntity, String>{
 
 	UserEntity findByUserName(String username);
 
+	boolean existsByUserName(String userName);
+
 }

@@ -45,4 +45,8 @@ public class UserService {
                     return new UserNotFoundException("User with username '" + username + "' not found");
                 });
     }
+    
+    public boolean existsByUserName(String userName) {
+        return userDao.existsByUserName(userName);
+    }
 }

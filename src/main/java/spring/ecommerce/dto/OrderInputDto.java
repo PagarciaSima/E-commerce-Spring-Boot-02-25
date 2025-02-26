@@ -11,5 +11,5 @@ public class OrderInputDto {
 	private String fullAddress;
 	private String contactNumber;
 	private String alternateContactNumber;
-	private List<OrderProductQuantityDto> orderProducQuantityList;
+	private List<OrderProductQuantityDto> orderProductQuantityList;
 }
