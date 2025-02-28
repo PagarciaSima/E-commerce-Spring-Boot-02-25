@@ -59,6 +59,7 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
                             .requestMatchers("/api/v1/products/**").hasRole("AdminRole") 
                             .requestMatchers("/api/v1/product").hasRole("AdminRole")
                             .requestMatchers("/api/v1/placeOrder").hasRole("UserRole")
+                            .requestMatchers("/api/v1/addToCart/**").hasRole("UserRole")
 
                             .anyRequest().authenticated()
                          /*auth -> 

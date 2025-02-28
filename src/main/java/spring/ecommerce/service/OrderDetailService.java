@@ -2,20 +2,16 @@ package spring.ecommerce.service;
 
 import java.util.List;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dao.OrderDetailDao;
 import spring.ecommerce.dao.ProductDao;
-import spring.ecommerce.dao.UserDao;
 import spring.ecommerce.dto.OrderInputDto;
 import spring.ecommerce.dto.OrderProductQuantityDto;
 import spring.ecommerce.entity.OrderDetailEntity;
 import spring.ecommerce.entity.ProductEntity;
-import spring.ecommerce.entity.UserEntity;
 
 /**
  * Service class responsible for handling order placement logic.
@@ -27,7 +23,7 @@ public class OrderDetailService {
 
     private OrderDetailDao orderDetailDao;
     private ProductDao productDao;
-    private UserDao userDao;
+    private CommonService commonService;
 
     private static final String ORDER_PLACED = "Placed";
 
@@ -64,7 +60,7 @@ public class OrderDetailService {
                     ORDER_PLACED,
                     orderAmount,
                     product,
-                    getAuthenticatedUser()
+                    this.commonService.getAuthenticatedUser()
             );
 
             orderDetailDao.save(orderDetailEntity);
@@ -72,21 +68,5 @@ public class OrderDetailService {
         }
 
         log.info("Order placement completed for user: {}", orderInputDto.getFullName());
-    }
-
-    /**
-     * Retrieves the authenticated user from the security context.
-     * 
-     * @return Authenticated {@link UserEntity}.
-     */
-    private UserEntity getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        log.debug("Authenticated user retrieved: {}", username);
-
-        return userDao.findById(username).orElseThrow(() -> {
-            log.error("User with username '{}' not found", username);
-            return new RuntimeException("Authenticated user not found");
-        });
     }
 }
