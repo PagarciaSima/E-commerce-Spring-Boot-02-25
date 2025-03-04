@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,11 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.dao.CartDao;
 import spring.ecommerce.dao.ImageDao;
 import spring.ecommerce.dao.ProductDao;
 import spring.ecommerce.dto.PageResponseDto;
+import spring.ecommerce.entity.CartEntity;
 import spring.ecommerce.entity.ImageEntity;
 import spring.ecommerce.entity.ProductEntity;
+import spring.ecommerce.entity.UserEntity;
 import spring.ecommerce.exception.ImageUploadException; // Nueva excepción personalizada
 import spring.ecommerce.exception.ProductNotFoundException;
 
@@ -31,6 +35,9 @@ public class ProductService {
 	
 	private final ProductDao productDao;
 	private final ImageDao imageDao;
+	private final CommonService commonService;
+	private final CartDao cartDao;
+
 
 	/**
      * Creates a new product in the system.
@@ -43,7 +50,7 @@ public class ProductService {
 
 	    if (files != null && files.length > 0) {
 	        try {
-	            Set<ImageEntity> images = uploadImages(files);
+	            Set<ImageEntity> images = this.uploadImages(files);
 	            product.setProductImages(images);
 	        } catch (ImageUploadException e) {
 	            log.error("Error uploading images", e);
@@ -51,7 +58,7 @@ public class ProductService {
 	        }
 	    }
 
-	    ProductEntity savedProduct = productDao.save(product);
+	    ProductEntity savedProduct = this.productDao.save(product);
 	    log.info("Product created successfully: {}", savedProduct.getProductId());
 	    return savedProduct;
 	}
@@ -89,11 +96,11 @@ public class ProductService {
 
 	    if (searchKey != null && !searchKey.isEmpty()) {
 	        // Filtrar por el searchKey (por ejemplo, nombre del producto)
-	        Page<ProductEntity> productPage = productDao.findByProductNameContainingIgnoreCase(searchKey, pageable);
+	        Page<ProductEntity> productPage = this.productDao.findByProductNameContainingIgnoreCase(searchKey, pageable);
 	        return new PageResponseDto<>(productPage.getContent(), productPage.getTotalPages(), productPage.getTotalElements(), productPage.getSize(), productPage.getNumber());
 	    } else {
 	        // Si no hay searchKey, retornar todos los productos
-	        Page<ProductEntity> productPage = productDao.findAll(pageable);
+	        Page<ProductEntity> productPage = this.productDao.findAll(pageable);
 	        return new PageResponseDto<>(productPage.getContent(), productPage.getTotalPages(), productPage.getTotalElements(), productPage.getSize(), productPage.getNumber());
 	    }
 	}
@@ -109,7 +116,7 @@ public class ProductService {
 	 * @return A list of all products sorted by their name.
 	 */
 	public List<ProductEntity> getAllProductsOrderedByName() {
-	    return productDao.findAll(Sort.by(Sort.Order.asc("productName")));
+	    return this.productDao.findAll(Sort.by(Sort.Order.asc("productName")));
 	}
 
 	/**
@@ -123,11 +130,11 @@ public class ProductService {
 	 * @throws ProductNotFoundException if the product with the given ID does not exist.
 	 */
 	public void deleteById(Integer productId) {
-	    if (!productDao.existsById(productId)) {
+	    if (!this.productDao.existsById(productId)) {
 	        log.warn("Product with ID {} not found. Cannot delete.", productId);
 	        throw new ProductNotFoundException("Product not found with ID: " + productId);  
 	    }
-	    productDao.deleteById(productId);
+	    this.productDao.deleteById(productId);
 	    log.info("Product with ID {} deleted successfully.", productId);
 	}
 
@@ -143,7 +150,7 @@ public class ProductService {
 	 */
 	public ProductEntity getProductById(Integer productId) {
 	    log.info("Attempting to retrieve product with ID: {}", productId);
-	    return productDao.findById(productId)
+	    return this.productDao.findById(productId)
 	        .orElseThrow(() -> new ProductNotFoundException("Product not found with ID: " + productId));
 	}
 
@@ -182,7 +189,7 @@ public class ProductService {
 	            if (previewImages.contains(image.getShortName())) {
 	                // Si la imagen es parte de las imágenes previas, la eliminamos de la base de datos
 	                log.info("Removing preview image: {}", image.getShortName());
-	                imageDao.delete(image);  
+	                this.imageDao.delete(image);  
 	            } else {
 	                // Si no está en la lista de preview, la mantenemos
 	                finalImages.add(image);
@@ -204,7 +211,7 @@ public class ProductService {
 	    existingProduct.setProductImages(finalImages);
 
 	    // Guardar el producto actualizado
-	    productDao.save(existingProduct);
+	    this.productDao.save(existingProduct);
 	    log.info("Product with ID {} updated successfully.", id);
 	}
 
@@ -236,17 +243,19 @@ public class ProductService {
 
 	public List<ProductEntity> getProductDetailsById(boolean isSingleProductCheckOut, Integer productId) {
 		// Buy a single product
-		if(isSingleProductCheckOut) {
+		if(isSingleProductCheckOut && productId != 0) {
 			List<ProductEntity> productList = new ArrayList<>();
-			ProductEntity product = productDao.findById(productId).get();		
+			ProductEntity product = this.productDao.findById(productId).get();		
 			productList.add(product);
 			return productList;
 		} 
 		// Checkout entire car
 		else {
+			UserEntity userEntity = this.commonService.getAuthenticatedUser();
+			List<CartEntity> carts = this.cartDao.findByUserEntity(userEntity);
 			
+			return carts.stream().map(cart -> cart.getProductEntity()).collect(Collectors.toList());
 		}
-		return new ArrayList<>();
 	}
 
 }

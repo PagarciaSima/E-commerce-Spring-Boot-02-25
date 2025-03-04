@@ -25,7 +25,7 @@ public class UserService {
      */
     public UserEntity createNewUser(UserEntity user) {
         log.info("Creating a new user with username: {}", user.getUserName());
-        UserEntity savedUser = userDao.save(user);
+        UserEntity savedUser = this.userDao.save(user);
         log.info("User created successfully: {}", savedUser.getUserName());
         return savedUser;
     }
@@ -39,7 +39,7 @@ public class UserService {
      */
     public UserEntity findByUserName(String username) {
         log.info("Searching for user with username: {}", username);
-        return Optional.ofNullable(userDao.findByUserName(username))
+        return Optional.ofNullable(this.userDao.findByUserName(username))
                 .orElseThrow(() -> {
                     log.warn("User with username '{}' not found", username);
                     return new UserNotFoundException("User with username '" + username + "' not found");
@@ -47,6 +47,6 @@ public class UserService {
     }
     
     public boolean existsByUserName(String userName) {
-        return userDao.existsByUserName(userName);
+        return this.userDao.existsByUserName(userName);
     }
 }

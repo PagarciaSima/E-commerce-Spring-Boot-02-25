@@ -32,15 +32,15 @@ public class RoleController {
 	 * Creates a new role in the system.
 	 *
 	 * @param role The role object containing role details.
-	 * @return A {@link ResponseEntity} containing the created {@link RoleEntity} or an
-	 *         error response in case of failure.
+	 * @return A {@link ResponseEntity} containing the created {@link RoleEntity} or
+	 *         an error response in case of failure.
 	 */
 	@PostMapping("/createNewRole")
 	public ResponseEntity<RoleEntity> createNewRole(@RequestBody @Valid RoleEntity role) {
 		log.info("Attempting to create a new role: {}", role.getRoleName());
 
 		try {
-			RoleEntity createdRole = roleService.createNewRole(role);
+			RoleEntity createdRole = this.roleService.createNewRole(role);
 			log.info("Role created successfully: {}", createdRole.getRoleName());
 			return new ResponseEntity<>(createdRole, HttpStatus.CREATED);
 		} catch (Exception e) {

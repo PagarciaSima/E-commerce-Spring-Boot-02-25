@@ -55,7 +55,7 @@ public class AuthController {
         log.info("Attempting login for user: {}", jwtRequest.getUserName());
 
         // Authenticate the user
-        Authentication auth = authenticationManager.authenticate(
+        Authentication auth = this.authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(jwtRequest.getUserName(), jwtRequest.getUserPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -66,10 +66,10 @@ public class AuthController {
                 SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString()
         );
 
-        UserEntity user = userService.findByUserName(jwtRequest.getUserName());
+        UserEntity user = this.userService.findByUserName(jwtRequest.getUserName());
 
         // Generate JWT token
-        String token = jwtGenerator.getToken(jwtRequest.getUserName());
+        String token = this.jwtGenerator.getToken(jwtRequest.getUserName());
         return ResponseEntity.ok(new JwtResponseDto(user, token));
     }
 

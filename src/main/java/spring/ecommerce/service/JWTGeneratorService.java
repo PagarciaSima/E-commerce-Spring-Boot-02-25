@@ -4,23 +4,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.jwt.Constants;
 
 /**
  * Service responsible for generating JWT tokens for user authentication.
  */
 @Service
+@Slf4j
 public class JWTGeneratorService {
 
-	private static final Logger logger = LoggerFactory.getLogger(JWTGeneratorService.class);
 
     /**
      * Generates a JWT token for an authenticated user.
@@ -29,7 +28,7 @@ public class JWTGeneratorService {
      * @return A JWT token in Bearer format.
      */
     public String getToken(String username) {
-        logger.info("Generating JWT token for user: {}", username);
+       log.info("Generating JWT token for user: {}", username);
 
         // Retrieve the roles of the authenticated user
         List<String> roles = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
@@ -37,7 +36,7 @@ public class JWTGeneratorService {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
-        logger.debug("Assigned roles for the token: {}", roles);
+        log.debug("Assigned roles for the token: {}", roles);
 
         // Build the JWT token
         String token = Jwts.builder()
@@ -49,7 +48,7 @@ public class JWTGeneratorService {
             .signWith(Constants.getSignedKey(Constants.SECRET_KEY), SignatureAlgorithm.HS512)
             .compact();
 
-        logger.info("JWT token successfully generated for user: {}", username);
+        log.info("JWT token successfully generated for user: {}", username);
         return "Bearer " + token;
     }
 }

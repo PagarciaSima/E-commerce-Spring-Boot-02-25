@@ -65,7 +65,7 @@ public class ImageService {
     public Optional<ImageEntity> getImageById(Long id) {
         try {
             log.info("Fetching image by ID: {}", id);
-            return imageDao.findById(id);
+            return this.imageDao.findById(id);
         } catch (Exception e) {
             log.error("Error fetching image by ID: {}", e.getMessage());
             throw new RuntimeException("Error fetching image.");
@@ -111,10 +111,10 @@ public class ImageService {
     @Transactional
     public void removeImage(Long imageId) {
         // Elimina las relaciones en la tabla product_images
-    	imageDao.deleteFromProductImagesByImageID(imageId);
+    	this.imageDao.deleteFromProductImagesByImageID(imageId);
 
         // Elimina la imagen de la tabla image
-        imageDao.deleteById(imageId);
+        this.imageDao.deleteById(imageId);
     }
 
     /**
@@ -129,7 +129,7 @@ public class ImageService {
     public List<ImageEntity> getAllImages() {
         try {
             log.info("Fetching all images.");
-            return (List<ImageEntity>) imageDao.findAll();
+            return (List<ImageEntity>) this.imageDao.findAll();
         } catch (Exception e) {
             log.error("Error fetching all images: {}", e.getMessage());
             throw new RuntimeException("Error fetching all images.");

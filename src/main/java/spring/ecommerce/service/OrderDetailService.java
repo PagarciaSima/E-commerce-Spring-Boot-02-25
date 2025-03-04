@@ -40,7 +40,7 @@ public class OrderDetailService {
         for (OrderProductQuantityDto orderProductQuantityDto : productQuantityList) {
             log.debug("Processing product with ID: {}", orderProductQuantityDto.getProductId());
 
-            ProductEntity product = productDao.findById(orderProductQuantityDto.getProductId())
+            ProductEntity product = this.productDao.findById(orderProductQuantityDto.getProductId())
                     .orElseThrow(() -> {
                         log.error("Product with ID {} not found", orderProductQuantityDto.getProductId());
                         return new RuntimeException("Product not found");
@@ -63,7 +63,7 @@ public class OrderDetailService {
                     this.commonService.getAuthenticatedUser()
             );
 
-            orderDetailDao.save(orderDetailEntity);
+            this.orderDetailDao.save(orderDetailEntity);
             log.info("Order placed successfully for product ID: {}, Amount: {}", product.getProductId(), orderAmount);
         }
 

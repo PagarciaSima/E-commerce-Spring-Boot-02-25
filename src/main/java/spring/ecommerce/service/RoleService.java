@@ -24,7 +24,7 @@ public class RoleService {
      */
     public RoleEntity createNewRole(RoleEntity role) {
         log.info("Creating a new role: {}", role.getRoleName());
-        RoleEntity savedRole = roleDao.save(role);
+        RoleEntity savedRole = this.roleDao.save(role);
         log.info("Role '{}' created successfully.", savedRole.getRoleName());
         return savedRole;
     }
@@ -38,7 +38,7 @@ public class RoleService {
      */
     public RoleEntity findByRoleName(String roleName) {
         log.info("Searching for role: {}", roleName);
-        return Optional.ofNullable(roleDao.findByRoleName(roleName))
+        return Optional.ofNullable(this.roleDao.findByRoleName(roleName))
                 .orElseThrow(() -> {
                     log.warn("Role '{}' not found", roleName);
                     return new RoleNotFoundException("Role '" + roleName + "' not found");

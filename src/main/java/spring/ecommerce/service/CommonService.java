@@ -26,7 +26,7 @@ public class CommonService {
         String username = authentication.getName();
         log.debug("Authenticated user retrieved: {}", username);
 
-        return userDao.findById(username).orElseThrow(() -> {
+        return this.userDao.findById(username).orElseThrow(() -> {
             log.error("User with username '{}' not found", username);
             return new RuntimeException("Authenticated user not found");
         });

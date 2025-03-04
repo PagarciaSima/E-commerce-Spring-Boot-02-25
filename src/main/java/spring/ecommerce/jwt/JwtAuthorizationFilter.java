@@ -55,7 +55,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
                 if (claims.get("authorities") != null) {
                     log.info("Authorities found, setting authentication.");
-                    JwtValidate.setAuthentication(claims, customUserDetailService);
+                    JwtValidate.setAuthentication(claims, this.customUserDetailService);
                 } else {
                     log.warn("No authorities found in claims. Clearing security context.");
                     SecurityContextHolder.clearContext();

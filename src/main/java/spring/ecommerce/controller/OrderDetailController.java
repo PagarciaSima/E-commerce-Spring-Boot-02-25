@@ -31,7 +31,7 @@ public class OrderDetailController {
         log.info("Received order placement request for user: {}", orderInputDto.getFullName());
 
         try {
-            orderDetailService.placeOrder(orderInputDto);
+            this.orderDetailService.placeOrder(orderInputDto);
             log.info("Order successfully placed for user: {}", orderInputDto.getFullName());
         } catch (Exception e) {
             log.error("Failed to place order for user: {}. Error: {}", orderInputDto.getFullName(), e.getMessage(), e);

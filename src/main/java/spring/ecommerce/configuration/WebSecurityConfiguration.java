@@ -59,7 +59,7 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
                             .requestMatchers("/api/v1/products/**").hasRole("AdminRole") 
                             .requestMatchers("/api/v1/product").hasRole("AdminRole")
                             .requestMatchers("/api/v1/placeOrder").hasRole("UserRole")
-                            .requestMatchers("/api/v1/addToCart/**").hasRole("UserRole")
+                            .requestMatchers("/api/v1/cart/**").hasRole("UserRole")
 
                             .anyRequest().authenticated()
                          /*auth -> 
@@ -67,7 +67,7 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
         	    		
 	    		)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
-        		httpSecurity.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+        		httpSecurity.addFilterBefore(this.jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         
         return httpSecurity.build();

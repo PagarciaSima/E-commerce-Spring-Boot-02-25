@@ -42,7 +42,7 @@ public class ImageController {
      */
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
-        ImageEntity savedImage = imageService.saveImage(file);
+        ImageEntity savedImage = this.imageService.saveImage(file);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedImage);
     }
 
@@ -59,7 +59,7 @@ public class ImageController {
      */
     @GetMapping("/image/{id}")
     public ResponseEntity<String> getImageAsBase64(@PathVariable Long id) {
-        Optional<ImageEntity> image = imageService.getImageById(id);
+        Optional<ImageEntity> image = this.imageService.getImageById(id);
         if (image.isPresent()) {
             String base64Image = Base64.getEncoder().encodeToString(image.get().getPicByte());
             return ResponseEntity.ok(base64Image);
@@ -75,7 +75,7 @@ public class ImageController {
      */
     @GetMapping("/name/{name}")
     public ResponseEntity<?> getImageByName(@PathVariable String name) {
-        Optional<ImageEntity> image = imageService.getImageByName(name);
+        Optional<ImageEntity> image = this.imageService.getImageByName(name);
         return image.map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
@@ -88,7 +88,7 @@ public class ImageController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteImage(@PathVariable Long id) {
-        imageService.removeImage(id);
+        this.imageService.removeImage(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -99,7 +99,7 @@ public class ImageController {
      */
     @GetMapping
     public ResponseEntity<List<ImageEntity>> getAllImages() {
-        List<ImageEntity> images = imageService.getAllImages();
+        List<ImageEntity> images = this.imageService.getAllImages();
         return ResponseEntity.ok(images);
     }
 }
