@@ -241,16 +241,28 @@ public class ProductService {
 	    return images;
 	}
 
+    /**
+     * Retrieves product details based on the checkout type.
+     *
+     * @param isSingleProductCheckOut If true, fetches a single product by its ID.
+     *                                Otherwise, retrieves all products in the user's cart.
+     * @param productId The ID of the product to fetch (used only if isSingleProductCheckOut is true).
+     * @return A list of ProductEntity objects.
+     */
 	public List<ProductEntity> getProductDetailsById(boolean isSingleProductCheckOut, Integer productId) {
+        log.info("Fetching product details. Single checkout: {}, Product ID: {}", isSingleProductCheckOut, productId);
+
 		// Buy a single product
 		if(isSingleProductCheckOut && productId != 0) {
 			List<ProductEntity> productList = new ArrayList<>();
+            log.debug("Fetching single product with ID: {}", productId);
 			ProductEntity product = this.productDao.findById(productId).get();		
 			productList.add(product);
 			return productList;
 		} 
 		// Checkout entire car
 		else {
+	        log.debug("Fetching all products from the user's cart");
 			UserEntity userEntity = this.commonService.getAuthenticatedUser();
 			List<CartEntity> carts = this.cartDao.findByUserEntity(userEntity);
 			
