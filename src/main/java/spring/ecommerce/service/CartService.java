@@ -43,8 +43,8 @@ public class CartService {
 		log.info("Intentando añadir el producto con ID {} al carrito", productId);
 
 		ProductEntity productEntity = this.productDao.findById(productId).orElseThrow(() -> {
-			log.error("Producto con ID {} no encontrado", productId);
-			return new RuntimeException("Producto no encontrado");
+			log.error("Product not found ID {}", productId);
+			return new RuntimeException("Product not found");
 		});
 
 		UserEntity user = getAuthenticatedUser();
@@ -59,7 +59,7 @@ public class CartService {
 		CartEntity cartEntity = new CartEntity(productEntity, user);
 		CartEntity savedCart = this.cartDao.save(cartEntity);
 
-		log.info("Producto con ID {} añadido exitosamente al carrito del usuario {}", productId, user.getUserName());
+		log.info("Product ID {} successfully added to the user's cart for user {}", productId, user.getUserName());
 		return savedCart;
 	}
 
@@ -70,11 +70,11 @@ public class CartService {
 	 */
 	public List<CartEntity> getCartDetails() {
 		UserEntity user = getAuthenticatedUser();
-		log.info("Recuperando detalles del carrito para el usuario {}", user.getUserName());
+		log.info("Retrieving cart details for user {}", user.getUserName());
 
 		List<CartEntity> cartItems = this.cartDao.findByUserEntity(user);
 
-		log.info("Se encontraron {} elementos en el carrito del usuario {}", cartItems.size(), user.getUserName());
+		log.info("{} elements found in the cart for user {}", cartItems.size(), user.getUserName());
 		return cartItems;
 	}
 
@@ -85,7 +85,7 @@ public class CartService {
 	 */
 	private UserEntity getAuthenticatedUser() {
 		UserEntity user = this.commonService.getAuthenticatedUser();
-		log.debug("Usuario autenticado recuperado: {}", user.getUserName());
+		log.debug("Authenticated user: {}", user.getUserName());
 		return user;
 	}
 
@@ -101,7 +101,7 @@ public class CartService {
 	 */
 	public PageResponseDto<CartEntity> getCartDetailsOrderedByNameWithPagination(int page, int size, String searchKey) {
 		UserEntity user = getAuthenticatedUser();
-		log.info("Recuperando carrito paginado para usuario: {}, página: {}, tamaño: {}, búsqueda: {}",
+		log.info("Recovering paginated cart for user: {}, page: {}, size: {}, search key: {}",
 				user.getUserName(), page, size, searchKey);
 
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("productEntity.productName")));
@@ -121,5 +121,82 @@ public class CartService {
 				cartPage.getNumber() // Página actual
 		);
 	}
+	
+	/**
+	 * Deletes a specific item from the authenticated user's shopping cart.
+	 * 
+	 * <p>This method checks if the cart item exists before deleting it. If the item is found,
+	 * it will be deleted from the cart. If no item with the given ID is found, a {@link RuntimeException}
+	 * will be thrown to indicate that the item does not exist.</p>
+	 * 
+	 * @param cartId The ID of the cart item to be deleted.
+	 * @throws RuntimeException If the cart item with the given {@code cartId} is not found.
+	 */
+	public void deleteCartItem(Integer cartId) {
+	    UserEntity user = getAuthenticatedUser();
+	    log.info("Attempting to delete cart item with ID {} for user {}", cartId, user.getUserName());
+
+	    // Check if the cart item exists for the authenticated user
+	    CartEntity cartEntity = this.findById(cartId, user);
+
+	    // Ensure the cart item belongs to the authenticated user
+	    if (!cartEntity.getUserEntity().equals(user)) {
+	        log.error("Cart item with ID {} does not belong to user {}", cartId, user.getUserName());
+	        throw new RuntimeException("Cart item does not belong to the authenticated user");
+	    }
+
+	    // Proceed to delete the cart item
+	    this.cartDao.deleteById(cartId);
+	    log.info("Successfully deleted cart item with ID {} for user {}", cartId, user.getUserName());
+	}
+
+	/**
+	 * Retrieves a cart item by its ID for the specified user.
+	 * 
+	 * <p>This method attempts to find a cart item by its {@code cartId} for the given authenticated user. 
+	 * If the cart item exists, it will be returned. If the item is not found, a {@link RuntimeException}
+	 * will be thrown to indicate that the item does not exist for the user.</p>
+	 * 
+	 * @param cartId The ID of the cart item to be retrieved.
+	 * @param user The authenticated {@link UserEntity} associated with the cart item.
+	 * @return The {@link CartEntity} if found.
+	 * @throws RuntimeException If the cart item with the given {@code cartId} is not found for the user.
+	 */
+	public CartEntity findById(Integer cartId, UserEntity user) {
+	    CartEntity cartEntity = this.cartDao.findById(cartId).orElseThrow(() -> {
+	        log.error("Cart item with ID {} not found for user {}", cartId, user.getUserName());
+	        return new RuntimeException("Cart item not found");
+	    });
+	    return cartEntity;
+	}
+
+	/**
+	 * Deletes a list of cart items from the database.
+	 * <p>
+	 * This method removes all provided cart items in a single transaction.
+	 * If the list is empty or null, the method exits without performing any operations.
+	 * </p>
+	 *
+	 * @param cartItems the list of cart items to be deleted
+	 */
+	@Transactional
+	public void deleteCartItems(List<CartEntity> cartItems) {
+	    if (cartItems == null || cartItems.isEmpty()) {
+	        log.info("No cart items to delete.");
+	        return;
+	    }
+
+	    log.info("Deleting {} cart items.", cartItems.size());
+	    
+	    try {
+	        this.cartDao.deleteAll(cartItems);
+	        log.info("Successfully deleted {} cart items.", cartItems.size());
+	    } catch (Exception e) {
+	        log.error("Error while deleting cart items: {}", e.getMessage(), e);
+	        throw e;
+	    }
+	}
+
+
 
 }
