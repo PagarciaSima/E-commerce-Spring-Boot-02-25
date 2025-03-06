@@ -29,6 +29,7 @@ public class OrderDetailEntity {
 	private ProductEntity product;
 	@ManyToOne
 	private UserEntity user;
+	
 	public OrderDetailEntity(String orderFullName, String orderFullOrder, String orderContactNumber,
 			String orderAlternateContactNumber, String orderStatus, Double orderAmount, ProductEntity product,
 			UserEntity user) {

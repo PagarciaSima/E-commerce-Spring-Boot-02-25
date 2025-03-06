@@ -12,6 +12,7 @@ import spring.ecommerce.dto.OrderInputDto;
 import spring.ecommerce.dto.OrderProductQuantityDto;
 import spring.ecommerce.entity.OrderDetailEntity;
 import spring.ecommerce.entity.ProductEntity;
+import spring.ecommerce.entity.UserEntity;
 
 /**
  * Service class responsible for handling order placement logic.
@@ -26,7 +27,24 @@ public class OrderDetailService {
     private CommonService commonService;
 
     private static final String ORDER_PLACED = "Placed";
+    
+    /**
+     * Retrieves the list of order details for the authenticated user.
+     *
+     * @return A list of {@link OrderDetailEntity} belonging to the authenticated user.
+     */
+    public List<OrderDetailEntity> getOrderDetails() {
+        log.info("Fetching order details for the authenticated user");
 
+        UserEntity userEntity = this.commonService.getAuthenticatedUser();
+        log.debug("Authenticated user retrieved: {}", userEntity);
+
+        List<OrderDetailEntity> orderDetails = this.orderDetailDao.findByUser(userEntity);
+        log.info("Retrieved {} order details for user {}", orderDetails.size(), userEntity.getUserName());
+
+        return orderDetails;
+    }
+    
     /**
      * Places an order based on the provided order input.
      * 
