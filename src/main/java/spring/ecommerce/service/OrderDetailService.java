@@ -2,6 +2,10 @@ package spring.ecommerce.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +14,7 @@ import spring.ecommerce.dao.OrderDetailDao;
 import spring.ecommerce.dao.ProductDao;
 import spring.ecommerce.dto.OrderInputDto;
 import spring.ecommerce.dto.OrderProductQuantityDto;
+import spring.ecommerce.dto.PageResponseDto;
 import spring.ecommerce.entity.OrderDetailEntity;
 import spring.ecommerce.entity.ProductEntity;
 import spring.ecommerce.entity.UserEntity;
@@ -87,4 +92,59 @@ public class OrderDetailService {
 
         log.info("Order placement completed for user: {}", orderInputDto.getFullName());
     }
+
+	/**
+     * Retrieves a paginated and filtered list of order details based on search criteria.
+     * 
+     * @param page      The page number (0-based index).
+     * @param size      The number of records per page.
+     * @param searchKey The search keyword to filter orders by name.
+     * @return PageResponseDto containing the paginated orders.
+     */
+    public PageResponseDto<OrderDetailEntity> getOrderDetailsBySearchKeyWithPagination(int page, int size, String searchKey) {
+	    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("orderFullName")));
+
+	    if (searchKey != null && !searchKey.isEmpty()) {
+	        // Filtrar por el searchKey (por ejemplo, nombre del producto)
+	        Page<OrderDetailEntity> orderDetailsPage = this.orderDetailDao.findByOrderFullNameContainingIgnoreCase(searchKey, pageable);
+	        return new PageResponseDto<>(orderDetailsPage.getContent(), orderDetailsPage.getTotalPages(), orderDetailsPage.getTotalElements(), orderDetailsPage.getSize(), orderDetailsPage.getNumber());
+	    } else {
+	        // Si no hay searchKey, retornar todos los productos
+	        Page<OrderDetailEntity> orderDetailsPage = this.orderDetailDao.findAll(pageable);
+	        return new PageResponseDto<>(orderDetailsPage.getContent(), orderDetailsPage.getTotalPages(), orderDetailsPage.getTotalElements(), orderDetailsPage.getSize(), orderDetailsPage.getNumber());
+	    }
+	}
+    
+    /**
+     * Retrieves a paginated and filtered list of the authenticated user's order details.
+     *
+     * @param page      The page number (0-based index).
+     * @param size      The number of records per page.
+     * @param searchKey The search keyword to filter orders by name.
+     * @return PageResponseDto containing the paginated orders of the authenticated user.
+     */
+    public PageResponseDto<OrderDetailEntity> getMyOrderDetailsBySearchKeyWithPagination(int page, int size, String searchKey) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("orderFullName")));
+        
+        UserEntity userEntity = this.commonService.getAuthenticatedUser(); // Obtener el usuario autenticado
+
+        Page<OrderDetailEntity> orderDetailsPage;
+        
+        if (searchKey != null && !searchKey.isEmpty()) {
+            // Filtrar pedidos del usuario por nombre
+            orderDetailsPage = this.orderDetailDao.findByUserAndOrderFullNameContainingIgnoreCase(userEntity, searchKey, pageable);
+        } else {
+            // Obtener todos los pedidos del usuario
+            orderDetailsPage = this.orderDetailDao.findByUser(userEntity, pageable);
+        }
+
+        return new PageResponseDto<>(
+            orderDetailsPage.getContent(), 
+            orderDetailsPage.getTotalPages(), 
+            orderDetailsPage.getTotalElements(), 
+            orderDetailsPage.getSize(), 
+            orderDetailsPage.getNumber()
+        );
+    }
+
 }
