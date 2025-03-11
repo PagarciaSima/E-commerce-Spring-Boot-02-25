@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import spring.ecommerce.constants.ConstantsEcommerce;
 import spring.ecommerce.dto.PageResponseDto;
 import spring.ecommerce.entity.ImageEntity;
 import spring.ecommerce.entity.ProductEntity;
@@ -290,7 +291,7 @@ public class ProductController {
 
 			// Configurar encabezados para la descarga del archivo PDF
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Content-Disposition", "attachment; filename=product_list.pdf");
+			headers.add("Content-Disposition", "attachment; filename=" + ConstantsEcommerce.FILE_NAME + ".pdf");
 			headers.add("Content-Type", "application/pdf");
 
 			// Devolver el PDF como respuesta
@@ -324,7 +325,7 @@ public class ProductController {
 			// Set HTTP headers for file download
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-			headers.setContentDispositionFormData("attachment", "product_list.csv");
+			headers.setContentDispositionFormData("attachment",  ConstantsEcommerce.FILE_NAME + ".csv");
 
 			log.info("CSV file generated successfully. Sending response to client.");
 
@@ -363,7 +364,7 @@ public class ProductController {
 			// Set HTTP headers for file download
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-			headers.setContentDispositionFormData("attachment", "product_list.xlsx");
+			headers.setContentDispositionFormData("attachment", ConstantsEcommerce.FILE_NAME + ".xlsx");
 
 			log.info("Excel file generated successfully. Sending response to client.");
 

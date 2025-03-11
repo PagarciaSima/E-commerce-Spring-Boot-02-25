@@ -1,8 +1,13 @@
 package spring.ecommerce.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,7 +88,7 @@ public class OrderDetailController {
      * @param searchKey The search keyword to filter orders by full name.
      * @return ResponseEntity containing a paginated response with order details or an error message.
      */
-    @GetMapping("/getMyOrderDetailsPaginated")
+    @GetMapping("/getAllOrderDetailsPaginated")
     public ResponseEntity<?> getAllOrderDetailsOrderedByNameWithPagination(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -105,6 +110,39 @@ public class OrderDetailController {
                     .body("An error occurred while retrieving paginated order details.");
         }
     }
+    
+    /**
+     * Marks an order as delivered based on the given order ID.
+     *
+     * @param orderId the ID of the order to be marked as delivered
+     * @return ResponseEntity with a success or error message
+     */
+    @PatchMapping("/markOrderAsDelivered/{orderId}")
+    public ResponseEntity<Map<String, String>> markOrderAsDelivered(
+        @PathVariable Integer orderId,
+        @RequestBody Map<String, String> requestBody
+    ) {
+        log.info("Received request to mark order {} as delivered.", orderId);
+
+        try {
+            String newStatus = requestBody.get("status");
+            this.orderDetailService.markOrderAsDelivered(orderId, newStatus);
+            log.info("Order {} successfully marked as delivered.", orderId);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Order marked as delivered.");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error marking order {} as delivered: {}", orderId, e.getMessage());
+
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Failed to mark order as delivered.");
+
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
 
 
 }

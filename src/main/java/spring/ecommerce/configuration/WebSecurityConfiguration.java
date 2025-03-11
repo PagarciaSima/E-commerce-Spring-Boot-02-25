@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.AllArgsConstructor;
+import static spring.ecommerce.constants.ConstantsEcommerce.*;
 import spring.ecommerce.jwt.JwtAuthorizationFilter;
 
 
@@ -52,15 +53,19 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
                             .requestMatchers("/images/**").permitAll()
                             .requestMatchers("/api/v1/user/register").permitAll()
                             .requestMatchers("/api/v1/authenticate").permitAll()
-                            .requestMatchers("/api/v1/images/**").hasRole("AdminRole")
+                            .requestMatchers("/api/v1/images/**").hasRole(ADMIN_ROLE)
                             
                             .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
-                            .requestMatchers("/api/v1/products/**").hasRole("AdminRole") 
-                            .requestMatchers("/api/v1/product").hasRole("AdminRole")
-                            .requestMatchers("/api/v1/order/**").hasRole("UserRole")
-                            .requestMatchers("/api/v1/cart/**").hasRole("UserRole")
+                            .requestMatchers("/api/v1/products/**").hasRole(ADMIN_ROLE) 
+                            .requestMatchers("/api/v1/product").hasRole(ADMIN_ROLE)
+                            // 🔹 Especificamos primero la restricción para el endpoint de AdminRole
+                            .requestMatchers("/api/v1/order/getAllOrderDetailsPaginated").hasRole(ADMIN_ROLE)
+                            .requestMatchers("/api/v1/order/markOrderAsDelivered/**").hasRole(ADMIN_ROLE)
 
+                            // 🔹 Luego, permitimos que UserRole acceda a los demás endpoints de order
+                            .requestMatchers("/api/v1/order/**").hasRole(USER_ROLE)                            
+                            .requestMatchers("/api/v1/cart/**").hasRole(USER_ROLE)
                             .anyRequest().authenticated()
                          /*auth -> 
                         auth.anyRequest().permitAll() */

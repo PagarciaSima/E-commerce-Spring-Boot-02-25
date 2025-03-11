@@ -1,6 +1,7 @@
 package spring.ecommerce.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -145,6 +146,27 @@ public class OrderDetailService {
             orderDetailsPage.getSize(), 
             orderDetailsPage.getNumber()
         );
+    }
+    
+    /**
+     * Marks an order as delivered by updating its status.
+     *
+     * @param orderId the ID of the order to be marked as delivered
+     * @param newStatus 
+     */
+    public void markOrderAsDelivered(Integer orderId, String newStatus) {
+        log.info("Attempting to mark order {} as delivered.", orderId);
+        
+        Optional<OrderDetailEntity> optionalOrder = this.orderDetailDao.findById(orderId);
+        
+        if (optionalOrder.isPresent()) {
+            OrderDetailEntity orderDetailEntity = optionalOrder.get();
+            orderDetailEntity.setOrderStatus(newStatus);
+            this.orderDetailDao.save(orderDetailEntity);
+            log.info("Order {} successfully marked as delivered.", orderId);
+        } else {
+            log.warn("Order {} not found. Unable to mark as delivered.", orderId);
+        }
     }
 
 }
