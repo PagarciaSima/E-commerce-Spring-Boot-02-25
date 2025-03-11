@@ -22,4 +22,9 @@ public interface OrderDetailDao extends CrudRepository<OrderDetailEntity, Intege
 
 	public Page<OrderDetailEntity> findByUser(UserEntity userEntity, Pageable pageable);
 
+	public Page<OrderDetailEntity> findByOrderFullNameContainingIgnoreCaseAndOrderStatus(String searchKey,
+			String status, Pageable pageable);
+
+	public Page<OrderDetailEntity> findByOrderStatus(String status, Pageable pageable);
+
 }

@@ -60,7 +60,7 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
                             .requestMatchers("/api/v1/products/**").hasRole(ADMIN_ROLE) 
                             .requestMatchers("/api/v1/product").hasRole(ADMIN_ROLE)
                             // 🔹 Especificamos primero la restricción para el endpoint de AdminRole
-                            .requestMatchers("/api/v1/order/getAllOrderDetailsPaginated").hasRole(ADMIN_ROLE)
+                            .requestMatchers("/api/v1/order/getAllOrderDetailsPaginated/**").hasRole(ADMIN_ROLE)
                             .requestMatchers("/api/v1/order/markOrderAsDelivered/**").hasRole(ADMIN_ROLE)
 
                             // 🔹 Luego, permitimos que UserRole acceda a los demás endpoints de order

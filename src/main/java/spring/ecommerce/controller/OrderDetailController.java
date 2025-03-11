@@ -81,24 +81,29 @@ public class OrderDetailController {
     }
     
     /**
-     * Retrieves paginated order details, optionally filtered by a search key.
+     * Retrieves paginated order details, optionally filtered by search key and order status.
      *
-     * @param page      The page number (0-based index).
-     * @param size      The number of records per page.
-     * @param searchKey The search keyword to filter orders by full name.
-     * @return ResponseEntity containing a paginated response with order details or an error message.
+     * @param page      The page number to retrieve (default is 0).
+     * @param size      The number of records per page (default is 10).
+     * @param searchKey The search keyword to filter orders by full name (default is empty, meaning no filtering).
+     * @param status    The status of the orders to filter. If "all", no status filtering is applied.
+     * @return A {@link ResponseEntity} containing a {@link PageResponseDto} with the paginated list of 
+     *         {@link OrderDetailEntity}, or an error message in case of failure.
      */
-    @GetMapping("/getAllOrderDetailsPaginated")
+    @GetMapping("/getAllOrderDetailsPaginated/{status}")
     public ResponseEntity<?> getAllOrderDetailsOrderedByNameWithPagination(
+    		@PathVariable String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "") String searchKey) {
+            @RequestParam(defaultValue = "") String searchKey
+            
+    ) {
         
         log.info("Received request for paginated order details. Page: {}, Size: {}, SearchKey: '{}'", page, size, searchKey);
 
         try {
             PageResponseDto<OrderDetailEntity> pagedResponse = orderDetailService
-                    .getOrderDetailsBySearchKeyWithPagination(page, size, searchKey);
+                    .getOrderDetailsBySearchKeyWithPagination(page, size, searchKey, status);
             
             log.info("Successfully retrieved {} orders across {} pages.", 
                      pagedResponse.getTotalElements(), pagedResponse.getTotalPages());
