@@ -84,6 +84,19 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
+		
+		<dependency>
+		    <groupId>io.github.cdimascio</groupId>
+		    <artifactId>java-dotenv</artifactId>
+		    <version>5.2.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.paypal.sdk/rest-api-sdk -->
+		<dependency>
+		    <groupId>com.paypal.sdk</groupId>
+		    <artifactId>rest-api-sdk</artifactId>
+		    <version>1.14.0</version>
+		</dependency>
 	
 		<!-- Dependencia para Spring Security (si no la tienes ya, será útil para manejar la seguridad en la API) -->
 		<dependency>
@@ -107,6 +120,7 @@
 	        <artifactId>poi-ooxml</artifactId>
 	        <version>5.2.3</version>
 	    </dependency>
+	   
 	</dependencies>
 
 	<build>

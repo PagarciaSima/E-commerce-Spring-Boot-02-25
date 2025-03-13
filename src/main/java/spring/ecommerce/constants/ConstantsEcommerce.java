@@ -11,6 +11,8 @@ public class ConstantsEcommerce {
 	
 	// FILE NAMES / PRODUCTS
 	public static final String FILE_NAME = "Product_list";
+	
+	public static final String CANCELED_ORDER = "Canceled";
 
 
 }

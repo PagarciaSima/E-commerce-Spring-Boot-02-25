@@ -1,6 +1,7 @@
 package spring.ecommerce.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -36,18 +37,22 @@ public class OrderDetailController {
      * Endpoint to place an order.
      * 
      * @param orderInputDto Data Transfer Object containing order information.
+     * @return ResponseEntity containing the created order details or an error response.
      */
     @PostMapping("/placeOrder")
-    public void placeOrder(@RequestBody OrderInputDto orderInputDto) {
+    public ResponseEntity<?> placeOrder(@RequestBody OrderInputDto orderInputDto) {
         log.info("Received order placement request for user: {}", orderInputDto.getFullName());
 
         try {
-            this.orderDetailService.placeOrder(orderInputDto);
+            List<OrderDetailEntity> orderDetails = this.orderDetailService.placeOrder(orderInputDto);
             log.info("Order successfully placed for user: {}", orderInputDto.getFullName());
+            return ResponseEntity.ok(orderDetails);
         } catch (Exception e) {
-            log.error("Failed to place order for user: {}. Error: {}", orderInputDto.getFullName(), e.getMessage(), e);
+            log.error("Unexpected error placing order for user: {}. Error: {}", orderInputDto.getFullName(), e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Internal server error"));
         }
     }
+
     
     /**
      * Retrieves paginated order details, optionally filtered by a search key.
@@ -131,7 +136,7 @@ public class OrderDetailController {
 
         try {
             String newStatus = requestBody.get("status");
-            this.orderDetailService.markOrderAsDelivered(orderId, newStatus);
+            this.orderDetailService.changeOrderStatus(orderId, newStatus);
             log.info("Order {} successfully marked as delivered.", orderId);
 
             Map<String, String> response = new HashMap<>();

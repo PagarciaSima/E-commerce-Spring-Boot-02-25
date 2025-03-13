@@ -1,5 +1,6 @@
 package spring.ecommerce.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,14 +53,16 @@ public class OrderDetailService {
     }
     
     /**
-     * Places an order based on the provided order input.
+     * Places an order based on the provided order input and returns the created order details.
      * 
      * @param orderInputDto Data Transfer Object containing order details and product quantities.
+     * @return List of created OrderDetailEntity objects.
      */
-    public void placeOrder(OrderInputDto orderInputDto) {
+    public List<OrderDetailEntity> placeOrder(OrderInputDto orderInputDto) {
         log.info("Starting order placement for user: {}", orderInputDto.getFullName());
 
         List<OrderProductQuantityDto> productQuantityList = orderInputDto.getOrderProductQuantityList();
+        List<OrderDetailEntity> orderDetails = new ArrayList<>();
 
         for (OrderProductQuantityDto orderProductQuantityDto : productQuantityList) {
             log.debug("Processing product with ID: {}", orderProductQuantityDto.getProductId());
@@ -69,7 +72,7 @@ public class OrderDetailService {
                         log.error("Product with ID {} not found", orderProductQuantityDto.getProductId());
                         return new RuntimeException("Product not found");
                     });
-            
+
             double priceToUse = product.getProductDiscountedPrice() > 0 
                     ? product.getProductDiscountedPrice() 
                     : product.getProductActualPrice();
@@ -88,11 +91,14 @@ public class OrderDetailService {
             );
 
             this.orderDetailDao.save(orderDetailEntity);
+            orderDetails.add(orderDetailEntity);
             log.info("Order placed successfully for product ID: {}, Amount: {}", product.getProductId(), orderAmount);
         }
 
         log.info("Order placement completed for user: {}", orderInputDto.getFullName());
+        return orderDetails;
     }
+
 
     /**
      * Retrieves paginated order details based on search key and status filters.
@@ -174,7 +180,7 @@ public class OrderDetailService {
      * @param orderId the ID of the order to be marked as delivered
      * @param newStatus 
      */
-    public void markOrderAsDelivered(Integer orderId, String newStatus) {
+    public void changeOrderStatus(Integer orderId, String newStatus) {
         log.info("Attempting to mark order {} as delivered.", orderId);
         
         Optional<OrderDetailEntity> optionalOrder = this.orderDetailDao.findById(orderId);
