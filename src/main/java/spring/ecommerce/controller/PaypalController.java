@@ -12,11 +12,16 @@ import org.springframework.web.servlet.view.RedirectView;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dto.DataPaymentDto;
 import spring.ecommerce.dto.UrlPaypalResponseDto;
-import spring.ecommerce.service.OrderDetailService;
 import spring.ecommerce.service.PaypalService;
 
 /**
@@ -28,6 +33,7 @@ import spring.ecommerce.service.PaypalService;
 @AllArgsConstructor
 @RequestMapping("/api/v1/payments")
 @Slf4j
+@Tag(name = "Paypal", description = "API for managing Paypal endpoints")
 public class PaypalController {
 
     private final PaypalService paypalService;
@@ -41,6 +47,29 @@ public class PaypalController {
      * @param dataPayment The payment details received from the frontend.
      * @return The PayPal approval URL or a default URL if an error occurs.
      */
+    @Operation(
+	    summary = "Create a PayPal payment",
+	    description = "Creates a PayPal payment and returns the approval URL for the user to complete the transaction. Requires authentication.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Payment created successfully, returns the approval URL",
+	            content = @Content(
+	                mediaType = "application/json",
+	                schema = @Schema(implementation = UrlPaypalResponseDto.class)
+	            )
+	        ),
+	        @ApiResponse(
+	            responseCode = "400",
+	            description = "Invalid amount format"
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error when creating the PayPal payment"
+	        )
+	    }
+	)
     @PostMapping
     public UrlPaypalResponseDto createPayment(@RequestBody DataPaymentDto dataPayment) {
         log.info("Received payment request: {}", dataPayment);
@@ -82,6 +111,20 @@ public class PaypalController {
      * @param payerId The PayPal payer ID.
      * @return A redirect to the appropriate URL based on payment success or failure.
      */
+    @Operation(
+	    summary = "Handle PayPal payment success",
+	    description = "Executes a PayPal payment after user approval and redirects to the success or error page.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "302",
+	            description = "Redirects the user to the success or error page depending on the payment state"
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error while executing the PayPal payment"
+	        )
+	    }
+	)
     @GetMapping("/success")
     public RedirectView paymentSuccess(
             @RequestParam("paymentId") String paymentId,
@@ -106,6 +149,16 @@ public class PaypalController {
      *
      * @return A redirect to the home page.
      */
+    @Operation(
+	    summary = "Handle PayPal payment cancellation",
+	    description = "Redirects the user to the home page when a PayPal payment is cancelled.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "302",
+	            description = "Redirects the user to the home page"
+	        )
+	    }
+	)
     @GetMapping("/cancel")
     public RedirectView paymentCancelled() {
         log.info("Payment cancelled");
@@ -118,6 +171,16 @@ public class PaypalController {
      *
      * @return A redirect to the error page.
      */
+    @Operation(
+	    summary = "Handle PayPal payment errors",
+	    description = "Redirects the user to the error page when a PayPal payment fails.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "302",
+	            description = "Redirects the user to the payment error page"
+	        )
+	    }
+	)
     @GetMapping("/error")
     public RedirectView paymentError() {
         log.info("Payment error");

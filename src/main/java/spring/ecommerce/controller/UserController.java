@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +20,12 @@ import spring.ecommerce.service.UserService;
  * Controller responsible for handling user-related operations. Provides an
  * endpoint for user registration.
  */
-@RestController
-@Slf4j
-@AllArgsConstructor
-@RequestMapping("/api/v1/user")
 @CrossOrigin(origins = "http://localhost:4200")
+@RestController
+@AllArgsConstructor
+@Slf4j
+@RequestMapping("/api/v1/user")
+@Tag(name = "Users", description = "API for managing users")
 
 public class UserController {
 

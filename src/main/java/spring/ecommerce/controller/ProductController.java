@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,14 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,15 +44,16 @@ import spring.ecommerce.files.ExcelService;
 import spring.ecommerce.files.PdfService;
 import spring.ecommerce.service.ProductService;
 
-@RestController
-@RequestMapping("/api/v1/products")
-@Slf4j
-@AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
-
 /**
  * Controller for managing product-related operations.
  */
+
+@CrossOrigin(origins = "http://localhost:4200")
+@RestController
+@AllArgsConstructor
+@RequestMapping("/api/v1/products")
+@Slf4j
+@Tag(name = "Products", description = "API for managing products")
 public class ProductController {
 
 	private final PdfService pdfService; // Servicio para generar el PDF
@@ -76,6 +86,25 @@ public class ProductController {
 	 * @throws Exception if an error occurs while creating the product or uploading
 	 *                   the images.
 	 */
+	@Operation(
+	    summary = "Add a new product",
+	    description = "Creates a new product with optional image uploads. Requires multipart/form-data.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+	        description = "Product details and optional image files",
+	        required = true,
+	        content = @Content(
+	            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+	            schema = @Schema(implementation = ProductEntity.class)
+	        )
+	    ),
+	    responses = {
+	        @ApiResponse(responseCode = "201", description = "Product successfully created",
+	            content = @Content(schema = @Schema(implementation = ProductEntity.class))),
+	        @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@PostMapping(value = "/product", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	public ResponseEntity<?> addNewProduct(@RequestPart("product") @Valid ProductEntity product,
 			@RequestPart(value = "imageFile", required = false) MultipartFile[] files) {
@@ -120,6 +149,25 @@ public class ProductController {
 	 * @throws Exception if an error occurs while updating the product or its
 	 *                   images.
 	 */
+	@Operation(
+	    summary = "Update an existing product",
+	    description = "Updates a product by its ID, allowing modifications to details and images.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+	        description = "Updated product details with optional new and existing images",
+	        required = true,
+	        content = @Content(
+	            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE
+	        )
+	    ),
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Product updated successfully",
+	            content = @Content(schema = @Schema(implementation = Map.class))),
+	        @ApiResponse(responseCode = "400", description = "Bad request - Invalid input"),
+	        @ApiResponse(responseCode = "404", description = "Product not found"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@PutMapping(value = "/product/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateProduct(@RequestPart("product") @Valid ProductEntity product,
 			@PathVariable("productId") Integer productId,
@@ -150,6 +198,16 @@ public class ProductController {
 	 *         successful, or an error response with an HTTP 500 status if an error
 	 *         occurs.
 	 */
+	@Operation(
+	    summary = "Retrieve all products",
+	    description = "Fetches a list of all available products.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Successfully retrieved the product list",
+	            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductEntity.class)))),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@GetMapping("/all")
 	public ResponseEntity<?> getAllProducts() {
 		log.info("Attempting to get product list");
@@ -175,12 +233,25 @@ public class ProductController {
 	 * @return A ResponseEntity containing a paginated list of products, or an
 	 *         internal server error if an exception occurs during the retrieval.
 	 */
+	@Operation(
+	    summary = "Retrieve paginated and filtered product list",
+	    description = "Fetches a paginated list of products filtered by a search key and ordered by name.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "page", description = "Page number (default: 0)", example = "0"),
+	        @Parameter(name = "size", description = "Number of items per page (default: 10)", example = "10"),
+	        @Parameter(name = "searchKey", description = "Search keyword to filter products", example = "laptop")
+	    },
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Successfully retrieved paginated product list",
+	            content = @Content(schema = @Schema(implementation = PageResponseDto.class))),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@GetMapping()
 	public ResponseEntity<?> getAllProductsOrderedByNameWithPagination(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "") String searchKey) {
 		try {
-			// Usamos el servicio para obtener los productos filtrados o no según el
-			// searchKey
 			PageResponseDto<ProductEntity> pagedResponse = this.productService
 					.getProductsBySearchKeyWithPagination(page, size, searchKey);
 			return ResponseEntity.ok(pagedResponse);
@@ -201,6 +272,21 @@ public class ProductController {
 	 * @return A {@link ResponseEntity} containing the product details, or an error
 	 *         response in case of failure.
 	 */
+	@Operation(
+	    summary = "Retrieve product details",
+	    description = "Fetches the details of a product based on its ID. Can be used for single product checkout.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "isSingleProductCheckout", description = "Indicates if the request is for a single product checkout", example = "true"),
+	        @Parameter(name = "productId", description = "ID of the product to retrieve details for", required = true, example = "123")
+	    },
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Successfully retrieved product details",
+	            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductEntity.class)))),
+	        @ApiResponse(responseCode = "400", description = "Invalid product ID provided"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@GetMapping("/getProductDetails")
 	public ResponseEntity<?> getProductDetails(@RequestParam boolean isSingleProductCheckout,
 			@RequestParam Integer productId) {
@@ -230,6 +316,20 @@ public class ProductController {
 	 * @return a {@link ResponseEntity} containing the {@link ProductEntity} if
 	 *         found, or an HTTP 404 Not Found status if the product is not found
 	 */
+	@Operation(
+	    summary = "Retrieve a product by ID",
+	    description = "Fetches the details of a specific product using its ID.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "productId", description = "ID of the product to retrieve", required = true, example = "123")
+	    },
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Successfully retrieved the product",
+	            content = @Content(schema = @Schema(implementation = ProductEntity.class))),
+	        @ApiResponse(responseCode = "404", description = "Product not found"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@GetMapping("/product/{productId}")
 	public ResponseEntity<ProductEntity> getProduct(@PathVariable("productId") Integer productId) {
 		log.info("Attempting to get images for product ID: {}", productId);
@@ -254,6 +354,18 @@ public class ProductController {
 	 *         product is deleted successfully, or an HTTP 500 Internal Server Error
 	 *         status if an error occurs
 	 */
+	@Operation(
+	    summary = "Delete a product by ID",
+	    description = "Deletes a product using its ID. If the product does not exist, no action is taken.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "productId", description = "ID of the product to delete", required = true, example = "123")
+	    },
+	    responses = {
+	        @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+	        @ApiResponse(responseCode = "500", description = "Internal server error")
+	    }
+	)
 	@DeleteMapping("/product/{productId}")
 	public ResponseEntity<?> deleteProduct(@PathVariable(name = "productId") Integer productId) {
 		log.info("Attempting to delete product with ID: {}", productId);
@@ -280,6 +392,22 @@ public class ProductController {
 	 *         an error occurs during the PDF generation, an internal server error
 	 *         response is returned.
 	 */
+	@Operation(
+	    summary = "Generate a product list PDF",
+	    description = "Generates a PDF file containing a list of all products ordered by name.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200", 
+	            description = "PDF file generated successfully",
+	            content = @Content(
+	                mediaType = "application/pdf",
+	                schema = @Schema(type = "string", format = "binary")
+	            )
+	        ),
+	        @ApiResponse(responseCode = "500", description = "Internal server error while generating PDF")
+	    }
+	)
 	@GetMapping("/pdf")
 	public ResponseEntity<byte[]> generateProductListPdf() {
 		try {
@@ -307,6 +435,22 @@ public class ProductController {
 	 * @return A {@link ResponseEntity} containing the CSV file as a byte array. The
 	 *         response will include appropriate headers for file download.
 	 */
+	@Operation(
+	    summary = "Download product list as CSV",
+	    description = "Generates a CSV file containing a list of all products ordered by name.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "CSV file generated successfully",
+	            content = @Content(
+	                mediaType = "text/csv",
+	                schema = @Schema(type = "string", format = "binary")
+	            )
+	        ),
+	        @ApiResponse(responseCode = "500", description = "Internal server error while generating CSV")
+	    }
+	)
 	@GetMapping("/csv")
 	public ResponseEntity<byte[]> downloadProductListCsv() {
 		log.info("Request received to download product list as CSV.");
@@ -346,6 +490,22 @@ public class ProductController {
 	 *         byte array, or an HTTP 500 Internal Server Error if there was an
 	 *         issue during file generation.
 	 */
+	@Operation(
+	    summary = "Download product list as Excel",
+	    description = "Generates an Excel (.xlsx) file containing a list of all products ordered by name.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Excel file generated successfully",
+	            content = @Content(
+	                mediaType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	                schema = @Schema(type = "string", format = "binary")
+	            )
+	        ),
+	        @ApiResponse(responseCode = "500", description = "Internal server error while generating Excel file")
+	    }
+	)
 	@GetMapping("/excel")
 	public ResponseEntity<byte[]> downloadProductListExcel() {
 		log.info("Request received to download product list as Excel.");

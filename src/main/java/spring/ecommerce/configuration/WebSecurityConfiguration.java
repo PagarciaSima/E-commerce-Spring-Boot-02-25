@@ -34,46 +34,46 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
 	@Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-        		.cors(
-    				cors -> cors.configurationSource(
-    					request -> {
-    						CorsConfiguration configuration = new CorsConfiguration();
-    						configuration.setAllowedOrigins(Arrays.asList("*"));
-    						configuration.setAllowedMethods(Arrays.asList("*"));
-    						configuration.setAllowedHeaders(Arrays.asList("*"));
-    						return configuration;
-    					}
-					)
+    		.cors(
+				cors -> cors.configurationSource(
+					request -> {
+						CorsConfiguration configuration = new CorsConfiguration();
+						configuration.setAllowedOrigins(Arrays.asList("*"));
+						configuration.setAllowedMethods(Arrays.asList("*"));
+						configuration.setAllowedHeaders(Arrays.asList("*"));
+						return configuration;
+					}
 				)
-        		.csrf(csrf -> csrf.disable())
-        	    .authorizeHttpRequests(
-        	    		auth -> 
-                        auth
-                            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/actuator/**").permitAll()
-                            .requestMatchers("/images/**").permitAll()
-                            .requestMatchers("/api/v1/user/register").permitAll()
-                            .requestMatchers("/api/v1/authenticate").permitAll()
-                            .requestMatchers("/api/v1/images/**").hasRole(ADMIN_ROLE)
-                            
-                            .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
-                            .requestMatchers("/api/v1/products/**").hasRole(ADMIN_ROLE) 
-                            .requestMatchers("/api/v1/product").hasRole(ADMIN_ROLE)
-                            // 🔹 Especificamos primero la restricción para el endpoint de AdminRole
-                            .requestMatchers("/api/v1/order/getAllOrderDetailsPaginated/**").hasRole(ADMIN_ROLE)
-                            .requestMatchers("/api/v1/order/markOrderAsDelivered/**").hasRole(ADMIN_ROLE)
+			)
+    		.csrf(csrf -> csrf.disable())
+    	    .authorizeHttpRequests(
+	    		auth -> 
+                auth
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/actuator/**").permitAll()
+                    .requestMatchers("/images/**").permitAll()
+                    .requestMatchers("/api/v1/user/register").permitAll()
+                    .requestMatchers("/api/v1/authenticate").permitAll()
+                    .requestMatchers("/api/v1/images/**").hasRole(ADMIN_ROLE)
+                    
+                    .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/product/**").permitAll()
+                    .requestMatchers("/api/v1/products/**").hasRole(ADMIN_ROLE) 
+                    .requestMatchers("/api/v1/product").hasRole(ADMIN_ROLE)
+                    // 🔹 Especificamos primero la restricción para el endpoint de AdminRole
+                    .requestMatchers("/api/v1/order/getAllOrderDetailsPaginated/**").hasRole(ADMIN_ROLE)
+                    .requestMatchers("/api/v1/order/markOrderAsDelivered/**").hasRole(ADMIN_ROLE)
 
-                            // 🔹 Luego, permitimos que UserRole acceda a los demás endpoints de order
-                            .requestMatchers("/api/v1/order/**").hasRole(USER_ROLE)                            
-                            .requestMatchers("/api/v1/cart/**").hasRole(USER_ROLE)
-                            .requestMatchers("/api/v1/payments/success", "/api/v1/payments/cancel", "/api/v1/payments/error").permitAll() // Permite acceso a PayPal
-                            .anyRequest().authenticated()
-                         /*auth -> 
-                        auth.anyRequest().permitAll() */
-        	    		
-	    		)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
-        		httpSecurity.addFilterBefore(this.jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                    // 🔹 Luego, permitimos que UserRole acceda a los demás endpoints de order
+                    .requestMatchers("/api/v1/order/**").hasRole(USER_ROLE)                            
+                    .requestMatchers("/api/v1/cart/**").hasRole(USER_ROLE)
+                    .requestMatchers("/api/v1/payments/success", "/api/v1/payments/cancel", "/api/v1/payments/error").permitAll()
+                    .anyRequest().authenticated()
+                 /*auth -> 
+                auth.anyRequest().permitAll() */
+    	    		
+    		)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); 
+    		httpSecurity.addFilterBefore(this.jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         
         return httpSecurity.build();

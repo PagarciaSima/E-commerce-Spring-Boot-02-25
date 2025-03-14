@@ -15,6 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dto.OrderInputDto;
@@ -29,6 +36,8 @@ import spring.ecommerce.service.OrderDetailService;
 @AllArgsConstructor
 @Slf4j
 @RequestMapping("/api/v1/order")
+@Tag(name = "Orders", description = "API for managing orders")
+@SecurityRequirement(name = "bearerAuth")  
 public class OrderDetailController {
 
     private final OrderDetailService orderDetailService;
@@ -39,6 +48,30 @@ public class OrderDetailController {
      * @param orderInputDto Data Transfer Object containing order information.
      * @return ResponseEntity containing the created order details or an error response.
      */
+    @Operation(
+	    summary = "Place an order",
+	    description = "Places an order based on the provided order details. Requires authentication.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Order successfully placed",
+	            content = @Content(
+	                mediaType = "application/json",
+	                schema = @Schema(implementation = OrderDetailEntity.class) 
+	            )
+	        ),
+	        @ApiResponse(
+	            responseCode = "403",
+	            description = "Forbidden - Authentication required"
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error"
+
+	        )
+	    }
+	)
     @PostMapping("/placeOrder")
     public ResponseEntity<?> placeOrder(@RequestBody OrderInputDto orderInputDto) {
         log.info("Received order placement request for user: {}", orderInputDto.getFullName());
@@ -62,6 +95,30 @@ public class OrderDetailController {
      * @param searchKey The search keyword to filter orders by full name.
      * @return ResponseEntity containing a paginated response with order details or an error message.
      */
+    @Operation(
+	    summary = "Get paginated order details",
+	    description = "Retrieves a paginated list of order details, optionally filtered by a search key. Requires authentication.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "page", description = "Page number (default: 0)", example = "0"),
+	        @Parameter(name = "size", description = "Number of items per page (default: 10)", example = "10"),
+	        @Parameter(name = "searchKey", description = "Search keyword to filter results", example = "laptop")
+	    },
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Paginated list of order details",
+	            content = @Content(
+	                mediaType = "application/json",
+	                schema = @Schema(implementation = PageResponseDto.class)
+	            )
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error"
+	        )
+	    }
+	)
     @GetMapping("/getMyOrderDetailsPaginated")
     public ResponseEntity<?> getMyOrderDetailsOrderedByNameWithPagination(
             @RequestParam(defaultValue = "0") int page,
@@ -95,6 +152,31 @@ public class OrderDetailController {
      * @return A {@link ResponseEntity} containing a {@link PageResponseDto} with the paginated list of 
      *         {@link OrderDetailEntity}, or an error message in case of failure.
      */
+    @Operation(
+	    summary = "Get paginated order details by status",
+	    description = "Retrieves a paginated list of order details filtered by status, optionally filtered by a search key. Requires authentication.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "status", description = "Order status to filter by", example = "PENDING"),
+	        @Parameter(name = "page", description = "Page number (default: 0)", example = "0"),
+	        @Parameter(name = "size", description = "Number of items per page (default: 10)", example = "10"),
+	        @Parameter(name = "searchKey", description = "Search keyword to filter results", example = "laptop")
+	    },
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Paginated list of order details",
+	            content = @Content(
+	                mediaType = "application/json",
+	                schema = @Schema(implementation = PageResponseDto.class)
+	            )
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error"
+	        )
+	    }
+	)
     @GetMapping("/getAllOrderDetailsPaginated/{status}")
     public ResponseEntity<?> getAllOrderDetailsOrderedByNameWithPagination(
     		@PathVariable String status,
@@ -127,6 +209,28 @@ public class OrderDetailController {
      * @param orderId the ID of the order to be marked as delivered
      * @return ResponseEntity with a success or error message
      */
+    @Operation(
+	    summary = "Mark order as delivered",
+	    description = "Updates the status of an order to 'delivered'. Requires authentication.",
+	    security = @SecurityRequirement(name = "bearerAuth"),
+	    parameters = {
+	        @Parameter(name = "orderId", description = "ID of the order to be marked as delivered", example = "123")
+	    },
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Order successfully marked as delivered",
+	            content = @Content(
+	                mediaType = "application/json",
+	                schema = @Schema(example = "{ \"message\": \"Order marked as delivered.\" }")
+	            )
+	        ),
+	        @ApiResponse(
+	            responseCode = "500",
+	            description = "Internal server error"
+	        )
+	    }
+	)
     @PatchMapping("/markOrderAsDelivered/{orderId}")
     public ResponseEntity<Map<String, String>> markOrderAsDelivered(
         @PathVariable Integer orderId,
