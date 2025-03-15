@@ -1,11 +1,14 @@
 package spring.ecommerce.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +19,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.dto.JwtRequestDto;
 import spring.ecommerce.dto.JwtResponseDto;
 import spring.ecommerce.entity.UserEntity;
+import spring.ecommerce.exception.UserNotFoundException;
 import spring.ecommerce.service.JWTGeneratorService;
 import spring.ecommerce.service.UserService;
 
@@ -80,7 +85,7 @@ public class AuthController {
         }
     )
     @PostMapping("/authenticate")
-    public ResponseEntity<?> login(@RequestBody JwtRequestDto jwtRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody JwtRequestDto jwtRequest) {
         log.info("Attempting login for user: {}", jwtRequest.getUserName());
 
         // Authenticate the user
@@ -100,6 +105,31 @@ public class AuthController {
         // Generate JWT token
         String token = this.jwtGenerator.getToken(jwtRequest.getUserName());
         return ResponseEntity.ok(new JwtResponseDto(user, token));
+    }
+    
+	// AUTH EXCEPTIONS
+
+    /**
+     * Handles authentication failures, such as invalid credentials.
+     *
+     * @param ex the exception thrown during authentication
+     * @return a {@link ResponseEntity} with an error message and HTTP status 401 (Unauthorized)
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException ex) {
+        return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+    }
+    
+    /**
+     * Handles UserNotFoundException when a specified user is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link UserNotFoundException} thrown when the user is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleProductNotFoundException(UserNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
 }
