@@ -3,8 +3,10 @@ package spring.ecommerce.dto;
 import java.util.List;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PageResponseDto<T> {
     private List<T> content;
     private int totalPages;
