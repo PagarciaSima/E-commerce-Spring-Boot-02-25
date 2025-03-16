@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import spring.ecommerce.entity.RoleEntity;
+import spring.ecommerce.exception.RoleNotFoundException;
 import spring.ecommerce.service.RoleService;
 
 /**
@@ -76,5 +78,17 @@ public class RoleController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+    /**
+     * Handles RoleNotFoundException when a specified role is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link RoleNotFoundException} thrown when the role is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
 }

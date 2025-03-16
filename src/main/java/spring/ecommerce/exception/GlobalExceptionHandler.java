@@ -112,18 +112,6 @@ public class GlobalExceptionHandler {
     }
     
     // NOT FOUND EXCEPTIONS
-    
-    /**
-     * Handles RoleNotFoundException when a specified role is not found in the system.
-     * This method returns a response with the exception message and HTTP status 404 (Not Found).
-     * 
-     * @param ex The {@link RoleNotFoundException} thrown when the role is not found.
-     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
-     */
-    @ExceptionHandler(RoleNotFoundException.class)
-    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-    }
 
     /**
      * Handles ProductNotFoundException when a specified product is not found in the system.
