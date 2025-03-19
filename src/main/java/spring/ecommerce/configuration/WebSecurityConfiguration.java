@@ -66,6 +66,12 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
                     // 🔹 Luego, permitimos que UserRole acceda a los demás endpoints de order
                     .requestMatchers("/api/v1/order/**").hasRole(USER_ROLE)                            
                     .requestMatchers("/api/v1/cart/**").hasRole(USER_ROLE)
+                    
+                    .requestMatchers("/api/v1/dashboard/orders-by-status/**").permitAll()
+                    .requestMatchers("/api/v1/dashboard/sales-per-month/**").hasRole(USER_ROLE)
+                    .requestMatchers("/api/v1/dashboard/sales-per-month-admin/**").hasRole(ADMIN_ROLE) 
+                    .requestMatchers("/api/v1/dashboard/top-selling/**").hasRole(ADMIN_ROLE)   
+                    .requestMatchers("/api/v1/dashboard/last-four/**").hasRole(USER_ROLE)                   
                     .requestMatchers("/api/v1/payments/success", "/api/v1/payments/cancel", "/api/v1/payments/error").permitAll()
                     .anyRequest().authenticated()
                  /*auth -> 

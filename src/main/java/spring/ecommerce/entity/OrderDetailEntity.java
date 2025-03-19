@@ -1,6 +1,11 @@
 package spring.ecommerce.entity;
 
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +30,12 @@ public class OrderDetailEntity {
 	private String orderAlternateContactNumber;
 	private String orderStatus;
 	private Double orderAmount;
+	@CreationTimestamp
+	private LocalDateTime orderDate; // Fecha de creación
+
+	@UpdateTimestamp
+	private LocalDateTime lastUpdated; // Última modificación
+	
 	@ManyToOne
 	private ProductEntity product;
 	@ManyToOne

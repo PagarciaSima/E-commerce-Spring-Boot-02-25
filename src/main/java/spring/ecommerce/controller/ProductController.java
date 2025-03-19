@@ -583,5 +583,24 @@ public class ProductController {
 			}
 		}).filter(image -> image != null).collect(Collectors.toSet());
 	}
+	
+	/**
+	 * Imports products from an Excel file and saves them in the database.
+	 * This method processes the uploaded file, extracts product information, 
+	 * and returns the list of imported products.
+	 *
+	 * @param file The {@link MultipartFile} representing the uploaded Excel file.
+	 * @return A {@link ResponseEntity} containing a list of {@link ProductEntity} objects 
+	 *         if the import is successful, or a 500 Internal Server Error status if an exception occurs.
+	 */
+	@PostMapping("/import-products")
+	public ResponseEntity<List<ProductEntity>> importProducts(@RequestParam("file") MultipartFile file) {
+	    try {
+	        List<ProductEntity> products = excelService.importProductsFromExcel(file);
+	        return ResponseEntity.ok(products);
+	    } catch (IOException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
 
 }
