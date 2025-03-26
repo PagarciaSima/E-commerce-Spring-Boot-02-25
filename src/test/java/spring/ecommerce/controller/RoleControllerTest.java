@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import spring.ecommerce.entity.RoleEntity;
+import spring.ecommerce.exception.GlobalExceptionHandler;
 import spring.ecommerce.service.RoleService;
 
 class RoleControllerTest {
@@ -35,7 +36,7 @@ class RoleControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(roleController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(roleController).setControllerAdvice(new GlobalExceptionHandler()).build();
     }
 
     @Test

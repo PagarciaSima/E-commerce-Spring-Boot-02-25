@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import spring.ecommerce.dto.JwtRequestDto;
 import spring.ecommerce.entity.UserEntity;
+import spring.ecommerce.exception.GlobalExceptionHandler;
 import spring.ecommerce.exception.UserNotFoundException;
 import spring.ecommerce.service.JWTGeneratorService;
 import spring.ecommerce.service.UserService;
@@ -49,7 +50,9 @@ public class AuthControllerTest {
 
     @BeforeEach
     void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(authController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(authController)
+                .setControllerAdvice(new GlobalExceptionHandler()) //
+                .build();
     }
 
     @Test

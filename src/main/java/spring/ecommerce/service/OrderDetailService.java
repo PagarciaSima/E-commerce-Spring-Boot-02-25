@@ -115,6 +115,7 @@ public class OrderDetailService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.asc("orderFullName")));
         Page<OrderDetailEntity> orderDetailsPage;
 
+
         if (searchKey != null && !searchKey.isEmpty()) {
             if ("all".equalsIgnoreCase(status)) {
                 // Search by full name without filtering by status

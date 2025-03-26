@@ -146,6 +146,7 @@
 	    </dependency>
 	    
 	    <!-- OPEN API -->
+	    <!--http://localhost:8081/swagger-ui/index.html#/ -->
 		<dependency>
 	        <groupId>org.springdoc</groupId>
 	        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -161,13 +162,12 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			
-			<!-- Usa la versión más reciente -->
+			 <!-- mvn surefire-report:report (raíz) / genera el report de test en target/site/surefire-report.html-->
 		  	<plugin>
 	            <groupId>org.apache.maven.plugins</groupId>
 	            <artifactId>maven-surefire-plugin</artifactId>
 	        </plugin>
-	        
-	        <!-- mvn surefire-report:report (raíz) / genera el report de test en target/site/surefire-report.html-->
+	             
 	        <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-compiler-plugin</artifactId>

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -138,5 +139,42 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ImageUploadException.class)
     public ResponseEntity<String> handleProductNotFoundException(ImageUploadException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+	// AUTH EXCEPTIONS
+
+    /**
+     * Handles authentication failures, such as invalid credentials.
+     *
+     * @param ex the exception thrown during authentication
+     * @return a {@link ResponseEntity} with an error message and HTTP status 401 (Unauthorized)
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException ex) {
+        return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+    }
+    
+    /**
+     * Handles UserNotFoundException when a specified user is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link UserNotFoundException} thrown when the user is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleProductNotFoundException(UserNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+    
+    /**
+     * Handles RoleNotFoundException when a specified role is not found in the system.
+     * This method returns a response with the exception message and HTTP status 404 (Not Found).
+     * 
+     * @param ex The {@link RoleNotFoundException} thrown when the role is not found.
+     * @return A {@link ResponseEntity} with the exception message and HTTP status 404 (Not Found).
+     */
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<String> handleRoleNotFoundException(RoleNotFoundException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
