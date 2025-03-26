@@ -4,13 +4,13 @@
 FROM maven:3.8.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY pom.xml .  
+COPY src ./src  
 
-# Cachea las dependencias (se reusa si no cambia el pom.xml)
+# Cachea las dependencias
 RUN mvn dependency:go-offline -B
 
-# Empaqueta la aplicación (omitimos tests para el build)
+# Empaqueta la aplicación (omitimos tests)
 RUN mvn package -DskipTests
 
 # ----------------------------------------
@@ -23,9 +23,12 @@ WORKDIR /app
 # Copiamos el JAR desde la etapa de build
 COPY --from=build /app/target/*.jar ./app.jar
 
+# Copiar el archivo .env al contenedor final
+COPY .env .env
+
 # Variables importantes para Railway
 ENV PORT=8080
 EXPOSE $PORT
 
-# Comando de ejecución (usando variable PORT)
-ENTRYPOINT ["sh", "-c", "java -jar -Dserver.port=${PORT} app.jar"]
+# Cargar variables de .env antes de ejecutar la app
+ENTRYPOINT ["sh", "-c", "export $(grep -v '^#' .env | xargs) && java -jar -Dserver.port=${PORT} app.jar"]
