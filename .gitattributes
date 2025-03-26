@@ -1,2 +1,7 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# Maven Wrapper - Permisos Unix/Linux (para Railway)
+mvnw text eol=lf
+mvnw.cmd text eol=crlf
+
+# Aseguramos que los scripts sean ejecutables (para Git en Windows)
+mvnw binary
+mvnw.cmd text
