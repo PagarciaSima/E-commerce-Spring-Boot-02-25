@@ -38,7 +38,10 @@ public class WebSecurityConfiguration implements WebMvcConfigurer{
 				cors -> cors.configurationSource(
 					request -> {
 						CorsConfiguration configuration = new CorsConfiguration();
-						configuration.setAllowedOrigins(Arrays.asList("*"));
+						configuration.setAllowedOrigins(Arrays.asList(
+				                "http://localhost:4200",  // Para desarrollo
+				                "https://ecommerce-02-25.netlify.app/"  // Produccion
+				            ));
 						configuration.setAllowedMethods(Arrays.asList("*"));
 						configuration.setAllowedHeaders(Arrays.asList("*"));
 						return configuration;
