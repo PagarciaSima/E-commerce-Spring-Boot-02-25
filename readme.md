@@ -131,6 +131,15 @@ You can access the application via the following URLs:
 - **Production Frontend**:  
   [Production Frontend](https://ecommerce-02-25.netlify.app/login)
 
+### Deployed app
+![Deployed app](img/deployed.png)
+
+### ⚠️ Performance & Availability Notice  
+
+🚀 **Note:** The backend is hosted on **Railway's free tier**, which may cause **longer cold-start times** and **limited uptime**.  
+If the backend seems slow or unresponsive, it might be due to the service going to sleep after periods of inactivity.  
+Additionally, free-tier services may be subject to **downtime or deletion** by the hosting provider at any time.  
+
 ---
 
 
@@ -193,7 +202,22 @@ You can access the application via the following URLs:
 ### User / PayPal success payment
 ![User Paypal success](img/successPayment.png)
 
-
 ---
+
+## 🧪 Testing
+
+### Backend (JUnit)
+
+To check the **JUnit** reports for the backend, run the following command in the root directory of the project:
+
+```bash
+mvn surefire-report:report
+
+### Frontend (JUnit)
+
+To check the **JUnit** reports for the frontend, run the following command in the root directory of the project:
+
+ng test --include=**/component.spec.ts
+
 
 
