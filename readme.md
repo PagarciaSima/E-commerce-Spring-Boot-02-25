@@ -129,7 +129,7 @@ You can access the application via the following URLs:
   [Production Backend](https://pgsecommerce02-25-production.up.railway.app/)
 
 - **Production Frontend**:  
-  [Production Frontend](https://pgsecommerce02-25-production.netlify.app/)
+  [Production Frontend](https://ecommerce-02-25.netlify.app/login)
 
 ---
 
