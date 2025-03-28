@@ -1,5 +1,6 @@
 package spring.ecommerce.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,10 +37,11 @@ import spring.ecommerce.service.PaypalService;
 @Tag(name = "Paypal", description = "API for managing Paypal endpoints")
 public class PaypalController {
 
+
     private final PaypalService paypalService;
-    private final String SUCCESS_URL = "http://localhost:8081/api/v1/payments/success";
-    private final String CANCEL_URL = "http://localhost:8081/api/v1/payments/cancel";
-    private final String ERROR_URL = "http://localhost:8081/api/v1/payments/error"; 
+    private final String SUCCESS_URL = "http://localhost:8080/api/v1/payments/success";
+    private final String CANCEL_URL = "http://localhost:8080/api/v1/payments/cancel";
+    private final String ERROR_URL = "http://localhost:8080/api/v1/payments/error"; 
 
     /**
      * Creates a PayPal payment and returns the approval URL.
