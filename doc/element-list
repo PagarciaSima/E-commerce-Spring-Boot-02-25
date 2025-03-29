@@ -1,0 +1,12 @@
+spring.ecommerce
+spring.ecommerce.configuration
+spring.ecommerce.constants
+spring.ecommerce.controller
+spring.ecommerce.dao
+spring.ecommerce.dto
+spring.ecommerce.entity
+spring.ecommerce.exception
+spring.ecommerce.files
+spring.ecommerce.jwt
+spring.ecommerce.service
+spring.ecommerce.validation

@@ -204,7 +204,31 @@ Additionally, free-tier services may be subject to **downtime or deletion** by t
 
 ---
 
+## 📄 Documentation
+
+### Backend (Javadoc)
+The Javadoc for the backend can be found in:
+doc/index.html
+
+#### Javadocs
+![Javadocs](img/javadocs.png)
+
+### Frontend (TSDoc)
+The TSDoc for the frontend can be found in:
+documentation/index.html
+
+#### Tsdocs
+![Tsdocs](img/tsdoc.png)
+
+---
+
 ## 🧪 Testing
+
+### Frontend (JUnit)
+
+To check the **JUnit** reports for the frontend, run the following command in the root directory of the project:
+
+ng test --include=**/component.spec.ts
 
 ### Backend (JUnit)
 
@@ -213,11 +237,9 @@ To check the **JUnit** reports for the backend, run the following command in the
 ```bash
 mvn surefire-report:report
 
-### Frontend (JUnit)
+---
 
-To check the **JUnit** reports for the frontend, run the following command in the root directory of the project:
 
-ng test --include=**/component.spec.ts
 
 
 
